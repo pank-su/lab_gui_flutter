@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:lab_gui_flutter/jwt.dart';
+import 'package:lab_gui_flutter/repository.dart';
 import 'package:provider/provider.dart';
 import 'package:side_sheet_material3/side_sheet_material3.dart';
 
@@ -80,50 +83,7 @@ class _MainPageState extends State<MainPage> {
               IconButton(
                   onPressed: () {
                     showModalSideSheet(context,
-                        body: Container(
-                          margin: const EdgeInsets.only(left: 75, right: 75),
-                          child: Column(children: [
-                            const Text(
-                                "Введите ваш логин и пароль для входа в систему"),
-                            const SizedBox(
-                              height: 23,
-                            ),
-                            const TextField(
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(),
-                                labelText: 'Логин',
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 23,
-                            ),
-                            const TextField(
-                              obscureText: true,
-                              decoration: InputDecoration(
-                                  border: OutlineInputBorder(),
-                                  labelText: 'Пароль'),
-                            ),
-                            const SizedBox(
-                              height: 4,
-                            ),
-                            Container(
-                                margin: EdgeInsets.only(left: 16, right: 16),
-                                child: Text(
-                                    "Пароль, от вашего аккаунта вам может поменять или выдать администратор",
-                                    style: theme.textTheme.bodySmall?.apply(
-                                        color: theme
-                                            .colorScheme.onSurfaceVariant))),
-                            const SizedBox(
-                              height: 24,
-                            ),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: FilledButton(
-                                  onPressed: () {},
-                                  child: Text("Войти в аккаунт")),
-                            ),
-                          ]),
-                        ),
+                        body: AuthScreen(theme: theme),
                         header: "Авторизация",
                         addActions: false,
                         addDivider: false,
@@ -167,6 +127,112 @@ class _MainPageState extends State<MainPage> {
             )
           ],
         ));
+  }
+}
+
+class AuthScreen extends StatelessWidget {
+  const AuthScreen({
+    super.key,
+    required this.theme,
+  });
+
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context) {
+    final box = GetStorage();
+    final jwt = box.read("jwt");
+    if (jwt != null) {
+      return LoginComponent(theme: theme);
+    }else{
+      return ProfileInfoComponent();
+    }
+    return FutureBuilder(
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return LoginComponent(theme: theme);
+        } else {
+          return Center(
+            child: Column(children: [
+              CircularProgressIndicator.adaptive(),
+              Text("Загрузка информации")
+            ]),
+          );
+        }
+      },
+      future: testRequest(jwt),
+    );
+  }
+}
+
+class LoginComponent extends StatelessWidget {
+  const LoginComponent({
+    super.key,
+    required this.theme,
+  });
+
+  final ThemeData theme;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(left: 75, right: 75),
+      child: Column(children: [
+        const Text("Введите ваш логин и пароль для входа в систему"),
+        const SizedBox(
+          height: 23,
+        ),
+        const TextField(
+          decoration: InputDecoration(
+            border: OutlineInputBorder(),
+            labelText: 'Логин',
+          ),
+        ),
+        const SizedBox(
+          height: 23,
+        ),
+        const TextField(
+          obscureText: true,
+          decoration: InputDecoration(
+              border: OutlineInputBorder(), labelText: 'Пароль'),
+        ),
+        const SizedBox(
+          height: 4,
+        ),
+        Container(
+            margin: EdgeInsets.only(left: 16, right: 16),
+            child: Text(
+                "Пароль, от вашего аккаунта вам может поменять или выдать администратор",
+                style: theme.textTheme.bodySmall
+                    ?.apply(color: theme.colorScheme.onSurfaceVariant))),
+        const SizedBox(
+          height: 24,
+        ),
+        Align(
+          alignment: Alignment.centerRight,
+          child: FilledButton(onPressed: () {}, child: Text("Войти в аккаунт")),
+        ),
+      ]),
+    );
+  }
+}
+
+class ProfileInfoComponent extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(left: 40, right: 28),
+      child: Column(children: [
+        Container(alignment: Alignment.topCenter,
+          width: 188,
+          height: 188,
+          child: ClipRRect(borderRadius: BorderRadius.circular(1000),
+              child: Image(
+                  image: NetworkImage(
+                      "https://sun1.beeline-yaroslavl.userapi.com/s/v1/ig2/PrqTddqVrLQuv_zazUPZPnDeZ4H781yPMhpy67QzOY1-x_7xs1vCIs6goqEKfrloxQu_7iqONtMiF_7z-1bsMZKH.jpg?size=400x400&quality=95&crop=23,90,1266,1266&ava=1"))),
+        )
+      ]),
+    );
   }
 }
 
