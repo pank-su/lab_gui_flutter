@@ -51,13 +51,22 @@ class CollectionDataSource extends DataGridSource {
   DataGridRowAdapter? buildRow(DataGridRow row) {
     return DataGridRowAdapter(
         cells: row.getCells().map<Widget>((dataGridCell) {
+      if (dataGridCell.columnName == 'rna') {
+        return Container(
+          alignment: Alignment.center,
+          child: Checkbox(
+            value: dataGridCell.value,
+            onChanged: null,
+          ),
+        );
+      }
       return Container(
         alignment: (dataGridCell.columnName == 'id' ||
                 dataGridCell.columnName == 'latitude' ||
                 dataGridCell.columnName == 'longitude')
             ? Alignment.centerRight
             : Alignment.centerLeft,
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Text(dataGridCell.value?.toString() ?? ''),
       );
     }).toList());

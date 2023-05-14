@@ -13,19 +13,21 @@ Future<Jwt> login(String login, String password) async {
       await http.post(url, body: {'email': login, 'pass': password});
   print(response.body);
 
-  if (response.statusCode == 200)
+  if (response.statusCode == 200) {
     return Jwt.fromJson(response.body);
-  else
+  } else {
     throw Exception("Bad login or password");
+  }
 }
 
 Future<bool> testRequest(String jwt) async {
   var url = Uri.http(URL, "rpc/test");
   final response = await http.post(url);
-  if (response.statusCode == 200)
+  if (response.statusCode == 200) {
     return true;
-  else
+  } else {
     throw Exception("Bad login or password");
+  }
 }
 
 Future<List<CollectionItem>> getCollection() async {
@@ -39,6 +41,7 @@ Future<List<CollectionItem>> getCollection() async {
     List<CollectionItem> collection = List<CollectionItem>.from(
         l.map((model) => CollectionItem.fromJson(model)));
     return collection;
-  } else
+  } else {
     throw Exception("Network not found.");
+  }
 }

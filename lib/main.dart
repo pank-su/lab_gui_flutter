@@ -1,14 +1,8 @@
-import 'package:async/async.dart';
 import 'package:flutter/material.dart';
-import 'package:get_storage/get_storage.dart';
-import 'package:lab_gui_flutter/models/collection_data_source.dart';
-import 'package:lab_gui_flutter/models/jwt.dart';
-import 'package:lab_gui_flutter/repository.dart';
 import 'package:lab_gui_flutter/screens/auth.dart';
 import 'package:lab_gui_flutter/screens/collection_page.dart';
 import 'package:provider/provider.dart';
 import 'package:side_sheet_material3/side_sheet_material3.dart';
-import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import 'color_schemes.g.dart';
 
@@ -29,7 +23,7 @@ class MainApp extends StatelessWidget {
           theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
           darkTheme:
               ThemeData(useMaterial3: true, colorScheme: darkColorScheme),
-          home: MainPage()),
+          home: const MainPage()),
     );
   }
 }
@@ -58,13 +52,13 @@ class _MainPageState extends State<MainPage> {
 
     switch (selectedIndex) {
       case 0:
-        page = CollectionPage();
+        page = const CollectionPage();
         break;
       case 1:
-        page = TopologyPage();
+        page = const TopologyPage();
         break;
       case 2:
-        page = CollectorsPage();
+        page = const CollectorsPage();
         break;
       default:
         throw UnimplementedError("page not found");
@@ -76,7 +70,7 @@ class _MainPageState extends State<MainPage> {
             leading: Container(
                 margin: const EdgeInsets.only(left: 13),
                 child: IconButton(
-                  icon: Icon(Icons.menu),
+                  icon: const Icon(Icons.menu),
                   onPressed: () {
                     setState(() {
                       railVisible = !railVisible;
@@ -95,7 +89,7 @@ class _MainPageState extends State<MainPage> {
                         addBackIconButton: true,
                         addCloseIconButton: true);
                   },
-                  icon: Icon(Icons.account_circle))
+                  icon: const Icon(Icons.account_circle))
             ],
             title: const Text("Лаборатория геномики и палеогеномики")),
         body: Row(
@@ -104,6 +98,18 @@ class _MainPageState extends State<MainPage> {
                 child: Visibility(
                     visible: railVisible,
                     child: NavigationRail(
+                      leading: FloatingActionButton(
+                        onPressed: () {
+                          showDialog(
+                              context: context,
+                              builder: (context) {
+                                return Dialog(
+                                  child: Text("data"),
+                                );
+                              });
+                        },
+                        child: Icon(Icons.add),
+                      ),
                       selectedIndex: selectedIndex,
                       backgroundColor: surfaceContainer,
                       onDestinationSelected: (value) {
@@ -136,15 +142,19 @@ class _MainPageState extends State<MainPage> {
 }
 
 class TopologyPage extends StatelessWidget {
+  const TopologyPage({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return Text("Топология");
+    return const Text("Топология");
   }
 }
 
 class CollectorsPage extends StatelessWidget {
+  const CollectorsPage({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return Text("Сборщики");
+    return const Text("Сборщики");
   }
 }

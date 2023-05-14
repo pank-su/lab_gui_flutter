@@ -78,7 +78,7 @@ class _AuthScreenState extends State<AuthScreen> {
         if (snapshot.hasError) {
           return loginComponent;
         } else if (snapshot.hasData) {
-          return ProfileInfoComponent();
+          return const ProfileInfoComponent();
         } else {
           return const Center(
             child: Column(children: [
@@ -132,7 +132,7 @@ class LoginComponent extends StatelessWidget {
         TextField(
           controller: passwordController,
           obscureText: true,
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
               border: OutlineInputBorder(), labelText: 'Пароль'),
         ),
         const SizedBox(
@@ -153,7 +153,7 @@ class LoginComponent extends StatelessWidget {
               onPressed: () {
                 authNow();
               },
-              child: Text("Войти в аккаунт")),
+              child: const Text("Войти в аккаунт")),
         ),
       ]),
     );
@@ -179,7 +179,7 @@ class ProfileInfoComponent extends StatelessWidget {
               height: 188,
               child: ClipRRect(
                   borderRadius: BorderRadius.circular(1000),
-                  child: Image(
+                  child: const Image(
                       image: NetworkImage(
                           "https://sun1.beeline-yaroslavl.userapi.com/s/v1/ig2/PrqTddqVrLQuv_zazUPZPnDeZ4H781yPMhpy67QzOY1-x_7xs1vCIs6goqEKfrloxQu_7iqONtMiF_7z-1bsMZKH.jpg?size=400x400&quality=95&crop=23,90,1266,1266&ava=1"))),
             ),
@@ -196,7 +196,7 @@ class ProfileInfoComponent extends StatelessWidget {
             Align(
               alignment: Alignment.centerRight,
               child: FilledButton(
-                  onPressed: () {}, child: Text("Выйти из аккаунта")),
+                  onPressed: () {}, child: const Text("Выйти из аккаунта")),
             )
           ]),
     );
