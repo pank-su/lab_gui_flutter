@@ -1,11 +1,14 @@
 import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:lab_gui_flutter/jwt.dart';
+import 'package:lab_gui_flutter/models/collection_data_source.dart';
+import 'package:lab_gui_flutter/models/jwt.dart';
 import 'package:lab_gui_flutter/repository.dart';
 import 'package:lab_gui_flutter/screens/auth.dart';
+import 'package:lab_gui_flutter/screens/collection_page.dart';
 import 'package:provider/provider.dart';
 import 'package:side_sheet_material3/side_sheet_material3.dart';
+import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import 'color_schemes.g.dart';
 
@@ -129,13 +132,6 @@ class _MainPageState extends State<MainPage> {
             )
           ],
         ));
-  }
-}
-
-class CollectionPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Text("Коллекция");
   }
 }
 

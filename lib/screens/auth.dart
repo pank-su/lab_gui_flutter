@@ -2,7 +2,7 @@ import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 
-import '../jwt.dart';
+import '../models/jwt.dart';
 import '../repository.dart';
 
 class AuthScreen extends StatefulWidget {

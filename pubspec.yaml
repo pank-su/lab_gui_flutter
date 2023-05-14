@@ -13,7 +13,6 @@ dependencies:
   side_sheet_material3: ^0.0.1
   http: ^0.13.6
   get_storage: ^2.1.1
-  fluttertoast: ^8.2.1
   async: 2.11.0
   syncfusion_flutter_datagrid: ^21.2.4
 
