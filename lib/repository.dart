@@ -5,6 +5,8 @@ import 'package:lab_gui_flutter/models/base_model.dart';
 import 'package:lab_gui_flutter/models/collection_item.dart';
 import 'package:lab_gui_flutter/models/jwt.dart';
 
+import 'models/collector.dart';
+
 const URL = "localhost:3000";
 
 Future<Jwt> login(String login, String password) async {
@@ -68,9 +70,7 @@ Future<List<BaseModel>> getOrders() async {
 Future<List<BaseModel>> getFamiliesById(BaseModel order) async {
   var url = Uri.http(URL, 'family', {"order_id": "eq.${order.id}"});
 
-  print(url.toString());
   final response = await http.get(url);
-  print(response.statusCode);
 
   if (response.statusCode == 200) {
     Iterable l = json.decode(response.body);
@@ -84,9 +84,7 @@ Future<List<BaseModel>> getFamiliesById(BaseModel order) async {
 
 Future<List<BaseModel>> getGenusesById(BaseModel family) async {
   var url = Uri.http(URL, 'genus', {"family_id": "eq.${family.id}"});
-  print(url.toString());
   final response = await http.get(url);
-  print(response.statusCode);
 
   if (response.statusCode == 200) {
     Iterable l = json.decode(response.body);
@@ -100,14 +98,27 @@ Future<List<BaseModel>> getGenusesById(BaseModel family) async {
 
 Future<List<BaseModel>> getKindsById(BaseModel genus) async {
   var url = Uri.http(URL, 'kind', {"genus_id": "eq.${genus.id}"});
-  print(url.toString());
   final response = await http.get(url);
-  print(response.statusCode);
 
   if (response.statusCode == 200) {
     Iterable l = json.decode(response.body);
     List<BaseModel> orders = List<BaseModel>.from(l.map((model) =>
         BaseModel.fromJson(model, BaseModelsTypes.kind, parent: genus)));
+    return orders;
+  } else {
+    throw Exception("Network not found.");
+  }
+}
+
+
+Future<List<Collector>> getCollectors() async{
+  var url = Uri.http(URL, 'collector');
+  final response = await http.get(url);
+
+  if (response.statusCode == 200) {
+    Iterable l = json.decode(response.body);
+    List<Collector> orders = List<Collector>.from(l.map((collector) =>
+        Collector.fromJson(collector)));
     return orders;
   } else {
     throw Exception("Network not found.");
