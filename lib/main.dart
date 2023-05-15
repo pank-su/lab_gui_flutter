@@ -191,7 +191,7 @@ class _TopologyPageState extends State<TopologyPage> {
 
   Widget getLeading(BaseModel baseModel) {
     if (loadingModels.contains(baseModel)) {
-      return CircularProgressIndicator();
+      return const CircularProgressIndicator();
     }
 
     late final VoidCallback? onPressed;
@@ -212,7 +212,7 @@ class _TopologyPageState extends State<TopologyPage> {
         loadingModels.remove(baseModel);
         treeController.expand(baseModel);
       };
-    } else if (baseModel.type != BaseModelsTypes.kind) {
+    } else if (baseModel.type == BaseModelsTypes.kind) {
       isOpen = null;
       onPressed = null;
     } else {
@@ -232,13 +232,12 @@ class _TopologyPageState extends State<TopologyPage> {
         treeController: treeController,
         nodeBuilder: (context, entry) {
           return TreeIndentation(
+              entry: entry,
               child: Row(children: [
                 getLeading(entry.node),
                 Text(entry.node.name ?? "")
-              ]),
-              entry: entry);
+              ]));
         });
-    ;
   }
 }
 
