@@ -1,9 +1,8 @@
 import 'package:async/async.dart';
 import 'package:flutter/material.dart';
-import 'package:get_storage/get_storage.dart';
+import 'package:provider/provider.dart';
 
-import '../models/jwt.dart';
-import '../repository.dart';
+import '../main.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({
@@ -22,34 +21,20 @@ class _AuthScreenState extends State<AuthScreen> {
 
   final passwordController = TextEditingController();
 
-  final box = GetStorage();
-
   final AsyncMemoizer _memoizer = AsyncMemoizer();
 
-  _future() async {
-    return _memoizer
-        .runOnce(() async => await (!isAuth ? testRequest(jwt!) : auth()));
-  }
-
-  var isAuth = false;
+  var isLoadingNow = false;
 
   String? jwt;
 
-  void authNow() {
+  Future<void> authNow(MyAppState appState) async {
     setState(() {
-      isAuth = true;
+      isLoadingNow = true;
     });
-  }
-
-  Future<String> auth() async {
-    Jwt jwt = await login(loginController.text, passwordController.text);
-    print(jwt.token);
-    box.write("jwt", jwt.token);
+    await appState.auth(loginController.text, passwordController.text);
     setState(() {
-      this.jwt = jwt.token;
+      isLoadingNow = false;
     });
-    await box.save();
-    return "ok";
   }
 
   @override
@@ -61,38 +46,19 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
-    setState(() {
-      jwt = box.read("jwt");
-    });
-
+    var appState = context.watch<MyAppState>();
     final loginComponent = LoginComponent(
         theme: widget.theme,
         loginController: loginController,
         passwordController: passwordController,
         authNow: authNow);
-    if (jwt == null && !isAuth) {
+    if (isLoadingNow) {
+      return const CircularProgressIndicator();
+    }
+    if (!appState.isAuth) {
       return loginComponent;
     }
-    return FutureBuilder(
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return loginComponent;
-        } else if (snapshot.hasData) {
-          return const ProfileInfoComponent();
-        } else {
-          return const Center(
-            child: Column(children: [
-              CircularProgressIndicator.adaptive(),
-              SizedBox(
-                height: 10,
-              ),
-              Text("Загрузка информации")
-            ]),
-          );
-        }
-      },
-      future: _future(),
-    );
+    return const ProfileInfoComponent();
   }
 }
 
@@ -108,10 +74,11 @@ class LoginComponent extends StatelessWidget {
   final ThemeData theme;
   final TextEditingController loginController;
   final TextEditingController passwordController;
-  final void Function() authNow;
+  final Future<void> Function(MyAppState) authNow;
 
   @override
   Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
     return Container(
       margin: const EdgeInsets.only(left: 75, right: 75),
       child: Column(children: [
@@ -151,7 +118,7 @@ class LoginComponent extends StatelessWidget {
           alignment: Alignment.centerRight,
           child: FilledButton(
               onPressed: () {
-                authNow();
+                authNow(appState);
               },
               child: const Text("Войти в аккаунт")),
         ),

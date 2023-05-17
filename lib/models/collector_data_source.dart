@@ -28,7 +28,7 @@ class CollectorDataSource extends DataGridSource {
           alignment: (dataGridCell.columnName == 'id')
               ? Alignment.centerRight
               : Alignment.centerLeft,
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           child: Text(dataGridCell.value.toString()),
         );
       }).toList(),

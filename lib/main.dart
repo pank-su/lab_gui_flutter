@@ -1,29 +1,53 @@
 import 'package:flutter/material.dart';
-import 'package:lab_gui_flutter/models/collection_data_source.dart';
-import 'package:lab_gui_flutter/models/collector_data_source.dart';
+import 'package:flutter_session_manager/flutter_session_manager.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:lab_gui_flutter/repository.dart';
 import 'package:lab_gui_flutter/screens/auth.dart';
 import 'package:lab_gui_flutter/screens/collection_page.dart';
+import 'package:lab_gui_flutter/screens/collectors.dart';
 import 'package:provider/provider.dart';
 import 'package:side_sheet_material3/side_sheet_material3.dart';
-import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import 'color_schemes.g.dart';
+import 'models/jwt.dart';
 import 'screens/topology_page.dart';
 
 void main() {
   runApp(const MainApp());
 }
 
-class MyAppState extends ChangeNotifier {}
+class MyAppState extends ChangeNotifier {
+  final box = GetStorage();
+  var isAuth = false;
+  String? token;
+
+  Future<void> checkToken() async {
+    token = await SessionManager().get("token");
+    print(token);
+    if (token != null) {
+      isAuth = true;
+    }
+    notifyListeners();
+  }
+
+  Future<void> auth(String login_, String password) async {
+    Jwt jwt = await login(login_, password);
+    token = jwt.token;
+    await SessionManager().set("token", token);
+    isAuth = true;
+    notifyListeners();
+  }
+}
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final appState = MyAppState();
+    appState.checkToken();
     return ChangeNotifierProvider(
-      create: (context) => MyAppState(),
+      create: (context) => appState,
       child: MaterialApp(
           theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
           darkTheme:
@@ -47,6 +71,7 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
     var theme = Theme.of(context);
     var surfaceContainer = ElevationOverlay.applySurfaceTint(
         theme.colorScheme.surface,
@@ -103,18 +128,20 @@ class _MainPageState extends State<MainPage> {
                 child: Visibility(
                     visible: railVisible,
                     child: NavigationRail(
-                      leading: FloatingActionButton(
-                        onPressed: () {
-                          showDialog(
-                              context: context,
-                              builder: (context) {
-                                return const Dialog(
-                                  child: Text("data"),
-                                );
-                              });
-                        },
-                        child: const Icon(Icons.add),
-                      ),
+                      leading: appState.isAuth
+                          ? FloatingActionButton(
+                              onPressed: () {
+                                showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return const Dialog(
+                                        child: Text("data"),
+                                      );
+                                    });
+                              },
+                              child: const Icon(Icons.add),
+                            )
+                          : Container(),
                       selectedIndex: selectedIndex,
                       backgroundColor: surfaceContainer,
                       onDestinationSelected: (value) {
@@ -143,63 +170,5 @@ class _MainPageState extends State<MainPage> {
             )
           ],
         ));
-  }
-}
-
-class CollectorsPage extends StatefulWidget {
-  const CollectorsPage({super.key});
-
-  @override
-  State<CollectorsPage> createState() => _CollectorsPageState();
-}
-
-class _CollectorsPageState extends State<CollectorsPage> {
-  final List<GridColumn> columns = <GridColumn>[
-  GridColumn(
-    columnName: 'id',
-    label: Container(
-      padding: EdgeInsets.all(16.0),
-      alignment: Alignment.centerRight,
-      child: Text('ID'),
-    ),
-  ),
-  GridColumn(
-    columnName: 'last_name',
-    width: 200,
-    label: Container(
-      padding: EdgeInsets.all(16.0),
-      alignment: Alignment.centerLeft,
-      child: Text('Last Name'),
-    ),
-  ),
-  GridColumn(
-    columnName: 'first_name',
-    width: 200,
-    label: Container(
-      padding: EdgeInsets.all(16.0),
-      alignment: Alignment.centerLeft,
-      child: Text('First Name'),
-    ),
-  ),
-  GridColumn(
-    columnName: 'second_name',
-    width: 200,
-    label: Container(
-      padding: EdgeInsets.all(16.0),
-      alignment: Alignment.centerLeft,
-      child: Text('Second Name'),
-    ),
-  ),
-];
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder(future: getCollectors(), builder: (context, snapshot){
-      if (snapshot.hasData){
-        return SfDataGrid(source: CollectorDataSource(snapshot.data!), columns: columns);
-      }else{
-        return Center(child: CircularProgressIndicator());
-      }
-    });
   }
 }
