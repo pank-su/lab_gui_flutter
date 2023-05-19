@@ -124,3 +124,14 @@ Future<List<Collector>> getCollectors() async{
     throw Exception("Network not found.");
   }
 }
+
+Future<int> getLastIdCollection() async{
+  var url = Uri.http(URL, 'collection', {"select": "id", "limit": "1", "order": "id.desc"});
+  final response = await http.get(url);
+  if (response.statusCode == 200){
+    Iterable l = json.decode(response.body);
+    return l.first["id"] as int;
+  } else {
+    throw Exception("Network not found.");
+  }
+}
