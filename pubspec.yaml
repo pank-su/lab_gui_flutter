@@ -17,6 +17,8 @@ dependencies:
   syncfusion_flutter_datagrid: ^21.2.4
   flutter_fancy_tree_view: ^1.1.1
   flutter_session_manager: ^1.0.3
+  flutter_map: ^4.0.0
+  latlong2: ^0.8.1
 
 
 dev_dependencies:

@@ -13,7 +13,7 @@ Future<Jwt> login(String login, String password) async {
   var url = Uri.http(URL, 'rpc/login');
 
   final response =
-      await http.post(url, body: {'email': login, 'pass': password});
+      await http.post(url, body: {'login': login, 'pass': password});
   print(response.body);
 
   if (response.statusCode == 200) {
