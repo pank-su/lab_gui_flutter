@@ -1,8 +1,9 @@
-import 'package:async/async.dart';
 import 'package:flutter/material.dart';
+import 'package:lab_gui_flutter/repository.dart';
 import 'package:provider/provider.dart';
 
 import '../main.dart';
+import '../models/user.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({
@@ -20,8 +21,6 @@ class _AuthScreenState extends State<AuthScreen> {
   final loginController = TextEditingController();
 
   final passwordController = TextEditingController();
-
-  final AsyncMemoizer _memoizer = AsyncMemoizer();
 
   var isLoadingNow = false;
 
@@ -58,7 +57,7 @@ class _AuthScreenState extends State<AuthScreen> {
     if (!appState.isAuth) {
       return loginComponent;
     }
-    return const ProfileInfoComponent();
+    return ProfileInfoComponent(appState: appState,);
   }
 }
 
@@ -127,12 +126,40 @@ class LoginComponent extends StatelessWidget {
   }
 }
 
-class ProfileInfoComponent extends StatelessWidget {
-  const ProfileInfoComponent({super.key});
+class ProfileInfoComponent extends StatefulWidget {
+  const ProfileInfoComponent({super.key, required this.appState});
+
+  final MyAppState appState;
+
+  @override
+  State<ProfileInfoComponent> createState() => _ProfileInfoComponentState();
+}
+
+class _ProfileInfoComponentState extends State<ProfileInfoComponent> {
+  User? user;
+
+  var isLoading = true;
+  
+  Future<void> getUserInfo(String token) async {
+    user = await getUserInfoByToken(token);
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  @override
+  void initState() {
+    getUserInfo(widget.appState.token!);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
     var theme = Theme.of(context);
+    if (isLoading == true){
+      return const Center(child: CircularProgressIndicator(),);
+    }
     return Container(
       margin: const EdgeInsets.only(left: 40, right: 28),
       width: double.infinity,
@@ -146,24 +173,24 @@ class ProfileInfoComponent extends StatelessWidget {
               height: 188,
               child: ClipRRect(
                   borderRadius: BorderRadius.circular(1000),
-                  child: const Image(
-                      image: NetworkImage(
-                          "https://sun1.beeline-yaroslavl.userapi.com/s/v1/ig2/PrqTddqVrLQuv_zazUPZPnDeZ4H781yPMhpy67QzOY1-x_7xs1vCIs6goqEKfrloxQu_7iqONtMiF_7z-1bsMZKH.jpg?size=400x400&quality=95&crop=23,90,1266,1266&ava=1"))),
+                  child: Image(
+                      image: NetworkImage(user?.avatarUrl ??
+                          "https://sun9-3.userapi.com/impg/GhqbifLL9RXukQi9AJ6SObwsLr-rQ2rDfYWLkg/qyxTl5xOlYU.jpg?size=188x188&quality=96&sign=1749242e0d43b4eaf90e28a74cec3cd9&type=album"))),
             ),
             Text(
-              "Фамилия",
+              user?.login ?? "Unknown",
               style: theme.textTheme.headlineLarge,
             ),
-            Text("Имя", style: theme.textTheme.headlineLarge),
+            // Text("Имя", style: theme.textTheme.headlineLarge),
             Text(
-              "Должность",
+              user?.role ?? "Unknown",
               style: theme.textTheme.labelLarge
                   ?.apply(color: theme.colorScheme.surfaceTint),
             ),
             Align(
               alignment: Alignment.centerRight,
               child: FilledButton(
-                  onPressed: () {}, child: const Text("Выйти из аккаунта")),
+                  onPressed: () async {appState.logout();}, child: const Text("Выйти из аккаунта")),
             )
           ]),
     );

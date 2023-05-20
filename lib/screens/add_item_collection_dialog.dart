@@ -42,7 +42,6 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
 
   Future<void> addNewItem() async {}
 
-
   @override
   Widget build(BuildContext context) {
     var dateFormat = DateFormat("dd.MM.yyyy");
@@ -159,8 +158,9 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
                                         lastDate: DateTime.now(),
                                         initialEntryMode:
                                             DatePickerEntryMode.input);
-                                    if (date != null){
-                                      dateController.text = dateFormat.format(date);
+                                    if (date != null) {
+                                      dateController.text =
+                                          dateFormat.format(date);
                                     }
                                   },
                                   icon: const Icon(Icons.today))),
@@ -434,5 +434,4 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
           ]),
         ));
   }
-
 }

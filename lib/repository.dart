@@ -6,6 +6,7 @@ import 'package:lab_gui_flutter/models/collection_item.dart';
 import 'package:lab_gui_flutter/models/jwt.dart';
 
 import 'models/collector.dart';
+import 'models/user.dart';
 
 const URL = "localhost:3000";
 
@@ -132,6 +133,17 @@ Future<int> getLastIdCollection() async{
     Iterable l = json.decode(response.body);
     return l.first["id"] as int;
   } else {
+    throw Exception("Network not found.");
+  }
+}
+
+Future<User> getUserInfoByToken(String token) async{
+  var url = Uri.http(URL, "rpc/get_user_info");
+  final response = await http.get(url, headers: {"Authorization": "Bearer: $token"});
+  if (response.statusCode == 200){
+    print(response.body);
+    return User.fromJson(response.body);
+  }else {
     throw Exception("Network not found.");
   }
 }

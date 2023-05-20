@@ -13,9 +13,12 @@ class CollectorDataSource extends DataGridSource {
         return DataGridRow(
           cells: [
             DataGridCell<int>(columnName: 'id', value: collector.id),
-            DataGridCell<String>(columnName: 'lastName', value: collector.lastName),
-            DataGridCell<dynamic>(columnName: 'firstName', value: collector.firstName),
-            DataGridCell<dynamic>(columnName: 'secondName', value: collector.secondName),
+            DataGridCell<String>(
+                columnName: 'lastName', value: collector.lastName),
+            DataGridCell<dynamic>(
+                columnName: 'firstName', value: collector.firstName),
+            DataGridCell<dynamic>(
+                columnName: 'secondName', value: collector.secondName),
           ],
         );
       }).toList();

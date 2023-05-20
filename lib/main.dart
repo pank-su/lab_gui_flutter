@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_session_manager/flutter_session_manager.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:lab_gui_flutter/repository.dart';
 import 'package:lab_gui_flutter/screens/auth.dart';
 import 'package:lab_gui_flutter/screens/collection_page.dart';
@@ -18,15 +17,19 @@ void main() {
 }
 
 class MyAppState extends ChangeNotifier {
-  final box = GetStorage();
   var isAuth = false;
   String? token;
 
   Future<void> checkToken() async {
     token = await SessionManager().get("token");
-    print(token);
     if (token != null) {
-      isAuth = true;
+      try {
+        testRequest(token!);
+        isAuth = true;
+      } on Exception {
+        SessionManager().set("token", null);
+        isAuth = false;
+      }
     }
     notifyListeners();
   }
@@ -36,6 +39,12 @@ class MyAppState extends ChangeNotifier {
     token = jwt.token;
     await SessionManager().set("token", token);
     isAuth = true;
+    notifyListeners();
+  }
+
+  Future<void> logout() async{
+    token = null;
+    isAuth = false;
     notifyListeners();
   }
 }
@@ -172,4 +181,3 @@ class _MainPageState extends State<MainPage> {
         ));
   }
 }
-
