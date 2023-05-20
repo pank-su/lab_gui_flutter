@@ -7,6 +7,7 @@ import 'package:lab_gui_flutter/models/jwt.dart';
 
 import 'models/collector.dart';
 import 'models/user.dart';
+import 'models/voucher_institute.dart';
 
 const URL = "localhost:3000";
 
@@ -49,9 +50,7 @@ Future<List<CollectionItem>> getCollection() async {
 
 Future<List<BaseModel>> getOrders() async {
   var url = Uri.http(URL, 'order');
-  print(url.toString());
   final response = await http.get(url);
-  print(response.statusCode);
 
   if (response.statusCode == 200) {
     Iterable l = json.decode(response.body);
@@ -111,25 +110,25 @@ Future<List<BaseModel>> getKindsById(BaseModel genus) async {
   }
 }
 
-
-Future<List<Collector>> getCollectors() async{
+Future<List<Collector>> getCollectors() async {
   var url = Uri.http(URL, 'collector');
   final response = await http.get(url);
 
   if (response.statusCode == 200) {
     Iterable l = json.decode(response.body);
-    List<Collector> orders = List<Collector>.from(l.map((collector) =>
-        Collector.fromJson(collector)));
+    List<Collector> orders = List<Collector>.from(
+        l.map((collector) => Collector.fromJson(collector)));
     return orders;
   } else {
     throw Exception("Network not found.");
   }
 }
 
-Future<int> getLastIdCollection() async{
-  var url = Uri.http(URL, 'collection', {"select": "id", "limit": "1", "order": "id.desc"});
+Future<int> getLastIdCollection() async {
+  var url = Uri.http(
+      URL, 'collection', {"select": "id", "limit": "1", "order": "id.desc"});
   final response = await http.get(url);
-  if (response.statusCode == 200){
+  if (response.statusCode == 200) {
     Iterable l = json.decode(response.body);
     return l.first["id"] as int;
   } else {
@@ -137,13 +136,29 @@ Future<int> getLastIdCollection() async{
   }
 }
 
-Future<User> getUserInfoByToken(String token) async{
+Future<User> getUserInfoByToken(String token) async {
   var url = Uri.http(URL, "rpc/get_user_info");
-  final response = await http.get(url, headers: {"Authorization": "Bearer: $token"});
-  if (response.statusCode == 200){
+  final response =
+      await http.get(url, headers: {"Authorization": "Bearer $token"});
+  if (response.statusCode == 200) {
     print(response.body);
     return User.fromJson(response.body);
-  }else {
+  } else {
+    throw Exception("Network not found.");
+  }
+}
+
+Future<List<VoucherInstitute>> getVoucherInstitute() async {
+  var url = Uri.http(URL, 'voucher_institute');
+  final response = await http.get(url);
+
+  if (response.statusCode == 200) {
+    print(response.body);
+    Iterable l = json.decode(response.body);
+    List<VoucherInstitute> vis = List<VoucherInstitute>.from(
+        l.map((vi) => VoucherInstitute.fromJson(vi)));
+    return vis;
+  } else {
     throw Exception("Network not found.");
   }
 }

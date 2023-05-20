@@ -19,6 +19,8 @@ dependencies:
   flutter_session_manager: ^1.0.3
   flutter_map: ^4.0.0
   latlong2: ^0.8.1
+  flutter_localizations:
+    sdk: flutter
 
 
 dev_dependencies:

@@ -5,7 +5,9 @@ import '../models/base_model.dart';
 import '../repository.dart';
 
 class TopologyPage extends StatefulWidget {
-  const TopologyPage({super.key});
+  const TopologyPage({super.key, required this.selectableMode});
+
+  final bool selectableMode;
 
   @override
   State<TopologyPage> createState() => _TopologyPageState();
@@ -24,6 +26,8 @@ class _TopologyPageState extends State<TopologyPage> {
       BaseModel(id: 0, name: "father", type: BaseModelsTypes.father);
 
   var loadingModels = <BaseModel>[];
+
+  BaseModel? selectableBaseModel = null;
 
   Future<void> loadOrders() async {
     var orders = await getOrders();
@@ -88,15 +92,38 @@ class _TopologyPageState extends State<TopologyPage> {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedTreeView(
-        treeController: treeController,
-        nodeBuilder: (context, entry) {
-          return TreeIndentation(
-              entry: entry,
-              child: Row(children: [
-                getLeading(entry.node),
-                Text(entry.node.name ?? "")
-              ]));
-        });
+    return Stack(children: [
+      AnimatedTreeView(
+          treeController: treeController,
+          nodeBuilder: (context, entry) {
+            return TreeIndentation(
+                entry: entry,
+                child: Row(children: [
+                  getLeading(entry.node),
+                  widget.selectableMode
+                      ? Container(
+                          color: entry.node == selectableBaseModel
+                              ? Theme.of(context).colorScheme.primaryContainer
+                              : Colors.transparent,
+                          child: GestureDetector(
+                            child: Text(entry.node.name ?? ""),
+                            onTap: () {
+                              setState(() {
+                                selectableBaseModel = entry.node;
+                              });
+                            },
+                          ))
+                      : Text(entry.node.name ?? "")
+                ]));
+          }),
+      widget.selectableMode
+          ? Container(
+              margin: EdgeInsets.all(70),
+              child: Align(
+                  alignment: Alignment.bottomRight,
+                  child: FilledButton(
+                      onPressed: () {}, child: Text("Подтвердить"))))
+          : Text("")
+    ]);
   }
 }

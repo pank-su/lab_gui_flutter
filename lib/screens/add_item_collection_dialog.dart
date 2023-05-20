@@ -3,6 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:lab_gui_flutter/repository.dart';
 import 'package:intl/intl.dart';
+import 'package:lab_gui_flutter/screens/topology_page.dart';
+
+import '../models/voucher_institute.dart';
 
 class AddCollectionItemDialog extends StatefulWidget {
   const AddCollectionItemDialog({super.key});
@@ -20,6 +23,9 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
   var _gender = Gender.Unknown;
   var _age = Age.Unknown;
   var _isRna = false;
+  List<VoucherInstitute> vauchInstitutes = [];
+  var menuIsVisible = false;
+
   final idController = TextEditingController();
   final numberController = TextEditingController();
   final collectIdController = TextEditingController();
@@ -33,21 +39,31 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
   final subRegionController = TextEditingController();
   final geoCommentController = TextEditingController();
   final commentController = TextEditingController();
+  final dateFormat = DateFormat("dd.MM.yyyy");
 
-  Future<void> getID() async {
-    var id = await getLastIdCollection();
+  final _textFieldKey = GlobalKey(); // FLUTTER багу два года, что за дела
+
+  static String _displayStringForOption(VoucherInstitute option) => option.name;
+
+  Future<void> getInfo() async {
+    // Получение идентифакторов и другой посредственной информации
+    var id = await getLastIdCollection() + 1;
     idController.text = id.toString();
     numberController.text = "ZIN-TER-M-${id + 4}";
+    vauchInstitutes = await getVoucherInstitute();
   }
 
   Future<void> addNewItem() async {}
 
   @override
-  Widget build(BuildContext context) {
-    var dateFormat = DateFormat("dd.MM.yyyy");
-    getID();
+  void initState() {
+    getInfo();
     dateController.text = dateFormat.format(DateTime.now());
+    super.initState();
+  }
 
+  @override
+  Widget build(BuildContext context) {
     var theme = Theme.of(context);
     var titleTextStyle =
         TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 22);
@@ -120,7 +136,9 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
                         SizedBox(
                             width: double.infinity,
                             child: FilledButton.tonal(
-                                onPressed: () {},
+                                onPressed: () {showDialog(context: context, builder: (context){
+                                  return Dialog(child: TopologyPage(selectableMode: true,));
+                                });},
                                 child: const Text(
                                   "Выбрать топологию",
                                 ))),
@@ -156,6 +174,7 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
                                         initialDate: DateTime.now(),
                                         firstDate: DateTime(1700),
                                         lastDate: DateTime.now(),
+                                        locale: const Locale('ru'),
                                         initialEntryMode:
                                             DatePickerEntryMode.input);
                                     if (date != null) {
@@ -168,15 +187,74 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
                         const SizedBox(
                           height: 22,
                         ),
-                        TextField(
-                          controller: vauchController,
-                          decoration: InputDecoration(
-                              border: const OutlineInputBorder(),
-                              labelText: 'Вауч. инст',
-                              suffixIcon: IconButton(
-                                  onPressed: () {},
-                                  icon: const Icon(Icons.keyboard_arrow_down))),
-                        ),
+                        RawAutocomplete<VoucherInstitute>(
+                            displayStringForOption: _displayStringForOption,
+                            optionsBuilder: (value) {
+                              if (!menuIsVisible) {
+                                return const Iterable.empty();
+                              }
+                              if (value.text.isNotEmpty) {
+                                return vauchInstitutes.where((element) =>
+                                    element.name
+                                        .toLowerCase()
+                                        .contains(value.text.toLowerCase()));
+                              }
+                              return vauchInstitutes;
+                            },
+                            fieldViewBuilder: (BuildContext context,
+                                TextEditingController
+                                    fieldTextEditingController,
+                                FocusNode fieldFocusNode,
+                                VoidCallback onFieldSubmitted) {
+                              return TextField(
+                                key: _textFieldKey,
+                                focusNode: fieldFocusNode,
+                                controller: fieldTextEditingController,
+                                onChanged: (value) {
+                                  setState(() {
+                                    menuIsVisible = value.isNotEmpty;
+                                  });
+                                },
+                                decoration: InputDecoration(
+                                    border: const OutlineInputBorder(),
+                                    labelText: 'Вауч. инст',
+                                    suffixIcon: IconButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            menuIsVisible = !menuIsVisible;
+                                          });
+                                        },
+                                        icon: const Icon(
+                                            Icons.keyboard_arrow_down))),
+                              );
+                            },
+                            optionsViewBuilder: (context, onSelected, options) {
+                              final textFieldBox = _textFieldKey.currentContext!
+                                  .findRenderObject() as RenderBox;
+                              final textFieldWidth = textFieldBox.size.width;
+                              return Material(
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.vertical(
+                                        bottom: Radius.circular(4.0)),
+                                  ),
+                                  // Баг флаттера
+                                  child: SizedBox(
+                                      width: 200,
+                                      child: ListView(
+                                        padding: const EdgeInsets.all(8.0),
+                                        children: options
+                                            .map((VoucherInstitute option) =>
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    onSelected(option);
+                                                  },
+                                                  child: ListTile(
+                                                    title: Text(option.name),
+                                                  ),
+                                                ))
+                                            .toList(),
+                                      )));
+                            }),
                         const SizedBox(
                           height: 22,
                         ),

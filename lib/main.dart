@@ -6,6 +6,7 @@ import 'package:lab_gui_flutter/screens/collection_page.dart';
 import 'package:lab_gui_flutter/screens/collectors.dart';
 import 'package:provider/provider.dart';
 import 'package:side_sheet_material3/side_sheet_material3.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'color_schemes.g.dart';
 import 'models/jwt.dart';
@@ -22,13 +23,12 @@ class MyAppState extends ChangeNotifier {
 
   Future<void> checkToken() async {
     token = await SessionManager().get("token");
-    if (token != null) {
+    if (token != null && token != "") {
       try {
         testRequest(token!);
         isAuth = true;
       } on Exception {
-        SessionManager().set("token", null);
-        isAuth = false;
+        await logout();
       }
     }
     notifyListeners();
@@ -42,9 +42,10 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> logout() async{
+  Future<void> logout() async {
     token = null;
     isAuth = false;
+    await SessionManager().set("token", "");
     notifyListeners();
   }
 }
@@ -59,11 +60,17 @@ class MainApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => appState,
       child: MaterialApp(
-          theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
-          restorationScopeId: 'app',
-          darkTheme:
-              ThemeData(useMaterial3: true, colorScheme: darkColorScheme),
-          home: const MainPage()),
+        theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
+        restorationScopeId: 'app',
+        darkTheme: ThemeData(useMaterial3: true, colorScheme: darkColorScheme),
+        home: const MainPage(),
+        localizationsDelegates: const [
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [Locale('ru')],
+      ),
     );
   }
 }
@@ -96,7 +103,7 @@ class _MainPageState extends State<MainPage> {
         page = const CollectionPage();
         break;
       case 1:
-        page = const TopologyPage();
+        page = const TopologyPage(selectableMode: false,);
         break;
       case 2:
         page = const CollectorsPage();

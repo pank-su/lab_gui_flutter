@@ -30,7 +30,26 @@ class _AuthScreenState extends State<AuthScreen> {
     setState(() {
       isLoadingNow = true;
     });
-    await appState.auth(loginController.text, passwordController.text);
+    try {
+      await appState.auth(loginController.text, passwordController.text);
+    } on Exception {
+      isLoadingNow = false;
+      showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text("Ошибка входа"),
+              content: const Text("Неверный логин или пароль"),
+              actions: [
+                FilledButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text("Понятно"))
+              ],
+            );
+          });
+    }
     setState(() {
       isLoadingNow = false;
     });
@@ -57,7 +76,9 @@ class _AuthScreenState extends State<AuthScreen> {
     if (!appState.isAuth) {
       return loginComponent;
     }
-    return ProfileInfoComponent(appState: appState,);
+    return ProfileInfoComponent(
+      appState: appState,
+    );
   }
 }
 
@@ -139,7 +160,7 @@ class _ProfileInfoComponentState extends State<ProfileInfoComponent> {
   User? user;
 
   var isLoading = true;
-  
+
   Future<void> getUserInfo(String token) async {
     user = await getUserInfoByToken(token);
     setState(() {
@@ -157,8 +178,10 @@ class _ProfileInfoComponentState extends State<ProfileInfoComponent> {
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
     var theme = Theme.of(context);
-    if (isLoading == true){
-      return const Center(child: CircularProgressIndicator(),);
+    if (isLoading == true) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
     }
     return Container(
       margin: const EdgeInsets.only(left: 40, right: 28),
@@ -190,7 +213,10 @@ class _ProfileInfoComponentState extends State<ProfileInfoComponent> {
             Align(
               alignment: Alignment.centerRight,
               child: FilledButton(
-                  onPressed: () async {appState.logout();}, child: const Text("Выйти из аккаунта")),
+                  onPressed: () async {
+                    appState.logout();
+                  },
+                  child: const Text("Выйти из аккаунта")),
             )
           ]),
     );
