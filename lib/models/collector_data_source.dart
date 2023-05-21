@@ -32,7 +32,7 @@ class CollectorDataSource extends DataGridSource {
               ? Alignment.centerRight
               : Alignment.centerLeft,
           padding: const EdgeInsets.all(16.0),
-          child: Text(dataGridCell.value.toString()),
+          child: Text((dataGridCell.value ?? "").toString()),
         );
       }).toList(),
     );

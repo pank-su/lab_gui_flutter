@@ -1,17 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:lab_gui_flutter/models/collector.dart';
+import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
+import '../main.dart';
 import '../models/collector_data_source.dart';
 import '../repository.dart';
 
 class CollectorsPage extends StatefulWidget {
-  const CollectorsPage({super.key});
+  const CollectorsPage({super.key, required this.selectableMode});
+
+  final bool selectableMode;
 
   @override
   State<CollectorsPage> createState() => _CollectorsPageState();
 }
 
 class _CollectorsPageState extends State<CollectorsPage> {
+  List<Collector> selectedCollectors = List.empty(growable: true);
+
   final List<GridColumn> columns = <GridColumn>[
     GridColumn(
       columnName: 'id',
@@ -50,17 +57,41 @@ class _CollectorsPageState extends State<CollectorsPage> {
     ),
   ];
 
+  final DataGridController _dataGridController = DataGridController();
+
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: getCollectors(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return SfDataGrid(
-                source: CollectorDataSource(snapshot.data!), columns: columns);
-          } else {
-            return const Center(child: CircularProgressIndicator());
-          }
-        });
+    var appState = context.watch<MyAppState>();
+
+    return Stack(children: [
+      FutureBuilder(
+          future: getCollectors(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return SfDataGrid(
+                  controller: _dataGridController,
+                  selectionMode: SelectionMode.multiple,
+                  source: CollectorDataSource(snapshot.data!),
+                  columns: columns);
+            } else {
+              return const Center(child: CircularProgressIndicator());
+            }
+          }),
+      widget.selectableMode
+          ? Container(
+              margin: const EdgeInsets.all(70),
+              child: Align(
+                  alignment: Alignment.bottomRight,
+                  child: FilledButton(
+                      onPressed: true
+                          ? () {
+                              appState
+                                  .setSelectedCollectors(_dataGridController.selectedRows);
+                              Navigator.pop(context);
+                            }
+                          : null,
+                      child: const Text("Подтвердить"))))
+          : const Text("")
+    ]);
   }
 }

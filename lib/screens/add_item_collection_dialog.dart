@@ -3,8 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:lab_gui_flutter/repository.dart';
 import 'package:intl/intl.dart';
+import 'package:lab_gui_flutter/screens/collectors.dart';
 import 'package:lab_gui_flutter/screens/topology_page.dart';
+import 'package:provider/provider.dart';
 
+import '../main.dart';
 import '../models/voucher_institute.dart';
 
 class AddCollectionItemDialog extends StatefulWidget {
@@ -64,6 +67,8 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
 
   @override
   Widget build(BuildContext context) {
+        var appState = context.watch<MyAppState>();
+
     var theme = Theme.of(context);
     var titleTextStyle =
         TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 22);
@@ -137,26 +142,28 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
                             width: double.infinity,
                             child: FilledButton.tonal(
                                 onPressed: () {showDialog(context: context, builder: (context){
-                                  return Dialog(child: TopologyPage(selectableMode: true,));
+                                  return const Dialog(child: TopologyPage(selectableMode: true,));
                                 });},
                                 child: const Text(
                                   "Выбрать топологию",
                                 ))),
-                        const SizedBox(
+                        SizedBox(
                           height: 73,
-                        ),
+                          child: Text(appState.selectedBaseModel?.getFullTopology().join(" ") ?? "")),
                         SizedBox(
                             width: double.infinity,
                             child: FilledButton.tonal(
-                                onPressed: () {},
+                                onPressed: () {showDialog(context: context, builder: ((context) {
+                                  return const Dialog(child: CollectorsPage(selectableMode: true,),);
+                                }));},
                                 child: const Text("Выбрать коллекторов"))),
-                        const SizedBox(
-                          height: 92,
-                        )
+                         SizedBox(
+                          height: 92, child: Text(appState.selectedCollectors.map((e) => e.lastName).join(", ")
+                        ))
                       ]),
                     ),
-                    const SizedBox(
-                      width: 57,
+                     const SizedBox(
+                      width: 57
                     ),
                     Expanded(
                         child: Column(

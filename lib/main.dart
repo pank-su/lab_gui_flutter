@@ -7,8 +7,11 @@ import 'package:lab_gui_flutter/screens/collectors.dart';
 import 'package:provider/provider.dart';
 import 'package:side_sheet_material3/side_sheet_material3.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import 'color_schemes.g.dart';
+import 'models/base_model.dart';
+import 'models/collector.dart';
 import 'models/jwt.dart';
 import 'screens/add_item_collection_dialog.dart';
 import 'screens/topology_page.dart';
@@ -20,6 +23,23 @@ void main() {
 class MyAppState extends ChangeNotifier {
   var isAuth = false;
   String? token;
+
+  BaseModel? selectedBaseModel;
+  List<Collector> selectedCollectors = List.empty(growable: true);
+
+  void setSelectedBaseModel(BaseModel? baseModel){
+    selectedBaseModel = baseModel;
+    notifyListeners();
+  }
+
+  Future<void> setSelectedCollectors(List<DataGridRow> collectorsRows) async{
+    var collectors = await getCollectors();
+    selectedCollectors.clear();
+    for (var el in collectorsRows){
+      selectedCollectors.add(collectors.firstWhere((element) => element.id == el.getCells().first.value));
+       }
+    notifyListeners();
+  }
 
   Future<void> checkToken() async {
     token = await SessionManager().get("token");
@@ -106,7 +126,7 @@ class _MainPageState extends State<MainPage> {
         page = const TopologyPage(selectableMode: false,);
         break;
       case 2:
-        page = const CollectorsPage();
+        page = const CollectorsPage(selectableMode: false);
         break;
       default:
         throw UnimplementedError("page not found");

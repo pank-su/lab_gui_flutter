@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
+import 'package:provider/provider.dart';
 
+import '../main.dart';
 import '../models/base_model.dart';
 import '../repository.dart';
 
@@ -27,7 +29,7 @@ class _TopologyPageState extends State<TopologyPage> {
 
   var loadingModels = <BaseModel>[];
 
-  BaseModel? selectableBaseModel = null;
+  BaseModel? selectableBaseModel;
 
   Future<void> loadOrders() async {
     var orders = await getOrders();
@@ -63,6 +65,7 @@ class _TopologyPageState extends State<TopologyPage> {
 
     final List<BaseModel>? children = childrenMap[baseModel];
 
+
     if (baseModel.name != null &&
         baseModel.type != BaseModelsTypes.kind &&
         children == null) {
@@ -90,8 +93,18 @@ class _TopologyPageState extends State<TopologyPage> {
     );
   }
 
+  bool firstSelect = false;
+
   @override
   Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
+    if (widget.selectableMode && !firstSelect){
+      setState(() {
+        selectableBaseModel = appState.selectedBaseModel;
+        firstSelect = true;
+      });
+    }
+
     return Stack(children: [
       AnimatedTreeView(
           treeController: treeController,
@@ -102,7 +115,7 @@ class _TopologyPageState extends State<TopologyPage> {
                   getLeading(entry.node),
                   widget.selectableMode
                       ? Container(
-                          color: entry.node == selectableBaseModel
+                          color: selectableBaseModel != null && entry.node.id == selectableBaseModel!.id &&  entry.node.name == selectableBaseModel!.name
                               ? Theme.of(context).colorScheme.primaryContainer
                               : Colors.transparent,
                           child: GestureDetector(
@@ -118,12 +131,19 @@ class _TopologyPageState extends State<TopologyPage> {
           }),
       widget.selectableMode
           ? Container(
-              margin: EdgeInsets.all(70),
+              margin: const EdgeInsets.all(70),
               child: Align(
                   alignment: Alignment.bottomRight,
                   child: FilledButton(
-                      onPressed: () {}, child: Text("Подтвердить"))))
-          : Text("")
+                      onPressed: selectableBaseModel != null
+                          ? () {
+                              appState
+                                  .setSelectedBaseModel(selectableBaseModel);
+                              Navigator.pop(context);
+                            }
+                          : null,
+                      child: const Text("Подтвердить"))))
+          : const Text("")
     ]);
   }
 }
