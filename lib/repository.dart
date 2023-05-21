@@ -162,3 +162,57 @@ Future<List<VoucherInstitute>> getVoucherInstitute() async {
     throw Exception("Network not found.");
   }
 }
+
+Future<void> addCollection({
+  required String catalogNumber,
+  required String collectId,
+  required String order,
+  required String family,
+  required String genus,
+  required String kind,
+  required String age,
+  required String sex,
+  required String vauchInst,
+  required String vauchId,
+  required String point,
+  required String country,
+  required String region,
+  required String subregion,
+  required String geocomment,
+  required String dateCollect,
+  required String comment,
+  required List<List<String>> collectors,
+  required String token,
+  bool rna = false,
+  
+}) async {
+  final url = Uri.http(URL, "rpc/add_collection");
+
+  final body = {
+    'catalog_number': catalogNumber,
+    'collect_id': collectId,
+    'order': order,
+    'family': family,
+    'genus': genus,
+    'kind': kind,
+    'age': age,
+    'sex': sex,
+    'vauch_inst': vauchInst,
+    'vauch_id': vauchId,
+    'point': point,
+    'country': country,
+    'region': region,
+    'subregion': subregion,
+    'geocomment': geocomment,
+    'date_collect': dateCollect,
+    'comment': comment,
+    'collectors': '{${collectors.map((collector) => '{"${collector[0]}", "${collector[1]}", "${collector[2]}"}').join(', ')}}',
+    'rna': rna.toString(),
+  };
+  final response = await http.post(
+    url,
+    body: body,
+    headers: {"Authorization": "Bearer $token"}
+  );
+  print(response.reasonPhrase);
+}

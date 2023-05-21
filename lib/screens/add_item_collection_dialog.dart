@@ -5,7 +5,10 @@ import 'package:lab_gui_flutter/repository.dart';
 import 'package:intl/intl.dart';
 import 'package:lab_gui_flutter/screens/collectors.dart';
 import 'package:lab_gui_flutter/screens/topology_page.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
+
+import 'package:osm_nominatim/osm_nominatim.dart';
 
 import '../main.dart';
 import '../models/voucher_institute.dart';
@@ -21,6 +24,8 @@ class AddCollectionItemDialog extends StatefulWidget {
 enum Gender { Unknown, Male, Female }
 
 enum Age { adult, subadult, juvenil, Unknown }
+
+enum MapMode { point, polygon, notSet }
 
 class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
   var _gender = Gender.Unknown;
@@ -44,6 +49,10 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
   final commentController = TextEditingController();
   final dateFormat = DateFormat("dd.MM.yyyy");
 
+  // Работа с картой
+  MapMode mapMode = MapMode.notSet;
+  LatLng point = LatLng(59.938284, 30.302509);
+
   final _textFieldKey = GlobalKey(); // FLUTTER багу два года, что за дела
 
   static String _displayStringForOption(VoucherInstitute option) => option.name;
@@ -56,7 +65,73 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
     vauchInstitutes = await getVoucherInstitute();
   }
 
-  Future<void> addNewItem() async {}
+  final mapController = MapController();
+
+  Future<void> setPointState() async {
+    setState(() {
+      mapMode = MapMode.point;
+      point = LatLng(
+        double.parse(latitudeController.text),
+        double.parse(longtitudeController.text),
+      );
+    });
+  }
+
+  Future<void> getCountryInfo() async {
+    final reverseSearchResult = await Nominatim.reverseSearch(
+        lat: point.latitude, lon: point.longitude, language: "ru");
+    countryController.text = reverseSearchResult.address?["country"];
+    regionController.text = reverseSearchResult.address?["region"] ?? "";
+    subRegionController.text = reverseSearchResult.address?["county"] ?? "";
+  }
+
+  Future<void> addNewItem(MyAppState appState) async {
+    final topology = appState.selectedBaseModel!.getFullTopology();
+    String order = topology[0];
+    String family = "";
+    String genus = "";
+    String kind = "";
+    
+
+    try{
+      String family = topology[1];
+      String genus = topology[2];
+      String kind = topology[3];
+    } on RangeError{
+      // cool block
+    }
+    
+    
+    List<List<String>> collectors = List.empty(growable: true);
+    for (var collector in appState.selectedCollectors) {
+      collectors.add([
+        collector.lastName ?? "",
+        collector.firstName ?? "",
+        collector.secondName ?? ""
+      ]);
+    }
+    await addCollection(
+        catalogNumber: numberController.text,
+        collectId: collectIdController.text,
+        order: order,
+        family: family,
+        genus: genus,
+        kind: kind,
+        age: _age.name,
+        sex: _gender.name,
+        vauchInst: vauchController.text,
+        vauchId: vauchIDController.text,
+        point: "Point(${point.latitude} ${point.longitude})",
+        country: countryController.text,
+        region: regionController.text,
+        subregion: subRegionController.text,
+        geocomment: geoCommentController.text,
+        dateCollect: dateController.text,
+        comment: commentController.text,
+        collectors: collectors,
+        token: appState.token!,
+        rna: _isRna);
+  }
 
   @override
   void initState() {
@@ -67,7 +142,7 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
 
   @override
   Widget build(BuildContext context) {
-        var appState = context.watch<MyAppState>();
+    var appState = context.watch<MyAppState>();
 
     var theme = Theme.of(context);
     var titleTextStyle =
@@ -141,30 +216,48 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
                         SizedBox(
                             width: double.infinity,
                             child: FilledButton.tonal(
-                                onPressed: () {showDialog(context: context, builder: (context){
-                                  return const Dialog(child: TopologyPage(selectableMode: true,));
-                                });},
+                                onPressed: () {
+                                  showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return const Dialog(
+                                            child: TopologyPage(
+                                          selectableMode: true,
+                                        ));
+                                      });
+                                },
                                 child: const Text(
                                   "Выбрать топологию",
                                 ))),
                         SizedBox(
-                          height: 73,
-                          child: Text(appState.selectedBaseModel?.getFullTopology().join(" ") ?? "")),
+                            height: 73,
+                            child: Text(appState.selectedBaseModel
+                                    ?.getFullTopology()
+                                    .join(" ") ??
+                                "")),
                         SizedBox(
                             width: double.infinity,
                             child: FilledButton.tonal(
-                                onPressed: () {showDialog(context: context, builder: ((context) {
-                                  return const Dialog(child: CollectorsPage(selectableMode: true,),);
-                                }));},
+                                onPressed: () {
+                                  showDialog(
+                                      context: context,
+                                      builder: ((context) {
+                                        return const Dialog(
+                                          child: CollectorsPage(
+                                            selectableMode: true,
+                                          ),
+                                        );
+                                      }));
+                                },
                                 child: const Text("Выбрать коллекторов"))),
-                         SizedBox(
-                          height: 92, child: Text(appState.selectedCollectors.map((e) => e.lastName).join(", ")
-                        ))
+                        SizedBox(
+                            height: 92,
+                            child: Text(appState.selectedCollectors
+                                .map((e) => e.lastName)
+                                .join(", ")))
                       ]),
                     ),
-                     const SizedBox(
-                      width: 57
-                    ),
+                    const SizedBox(width: 57),
                     Expanded(
                         child: Column(
                       children: [
@@ -409,12 +502,34 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(50),
                                 child: FlutterMap(
-                                    options: MapOptions(maxZoom: 15),
+                                    options: MapOptions(
+                                      center: point,
+                                      maxZoom: 15,
+                                      onSecondaryTap: (tapPosition, point) {
+                                        latitudeController.text =
+                                            point.latitude.toString();
+                                        longtitudeController.text =
+                                            point.longitude.toString();
+                                        setPointState();
+                                        getCountryInfo();
+                                      },
+                                    ),
+                                    mapController: mapController,
                                     children: [
                                       TileLayer(
                                         urlTemplate:
                                             'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                                         userAgentPackageName: 'su.pank.su',
+                                      ),
+                                      MarkerLayer(
+                                        markers: mapMode == MapMode.point
+                                            ? [
+                                                Marker(
+                                                    point: point,
+                                                    builder: (context) =>
+                                                        const FlutterLogo())
+                                              ]
+                                            : [],
                                       ),
                                     ]),
                               )),
@@ -426,10 +541,31 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
                               Expanded(
                                   child: TextField(
                                       keyboardType: TextInputType.number,
+                                      controller: latitudeController,
                                       inputFormatters: [
                                         FilteringTextInputFormatter.allow(
                                             RegExp(r'(^-?\d*\.?\d*)'))
                                       ],
+                                      onEditingComplete: () {
+                                        if (countryController.text.isNotEmpty ||
+                                            regionController.text.isNotEmpty ||
+                                            subRegionController
+                                                .text.isNotEmpty ||
+                                            latitudeController.text.isEmpty) {
+                                          return;
+                                        }
+                                        getCountryInfo();
+                                      },
+                                      onChanged: (value) {
+                                        if (countryController.text.isNotEmpty ||
+                                            regionController.text.isNotEmpty ||
+                                            subRegionController
+                                                .text.isNotEmpty ||
+                                            longtitudeController.text.isEmpty) {
+                                          return;
+                                        }
+                                        setPointState();
+                                      },
                                       decoration: const InputDecoration(
                                           border: OutlineInputBorder(),
                                           labelText: 'Широта'))),
@@ -439,6 +575,27 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
                               Expanded(
                                   child: TextField(
                                       keyboardType: TextInputType.number,
+                                      controller: longtitudeController,
+                                      onEditingComplete: () {
+                                        if (countryController.text.isNotEmpty ||
+                                            regionController.text.isNotEmpty ||
+                                            subRegionController
+                                                .text.isNotEmpty ||
+                                            latitudeController.text.isEmpty) {
+                                          return;
+                                        }
+                                        getCountryInfo();
+                                      },
+                                      onChanged: (val) {
+                                        if (countryController.text.isNotEmpty ||
+                                            regionController.text.isNotEmpty ||
+                                            subRegionController
+                                                .text.isNotEmpty ||
+                                            latitudeController.text.isEmpty) {
+                                          return;
+                                        }
+                                        setPointState();
+                                      },
                                       inputFormatters: [
                                         FilteringTextInputFormatter.allow(
                                             RegExp(r'(^-?\d*\.?\d*)'))
@@ -451,27 +608,30 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
                           const SizedBox(
                             height: 16,
                           ),
-                          const Row(
+                          Row(
                             children: [
                               Expanded(
                                   child: TextField(
-                                      decoration: InputDecoration(
+                                      controller: countryController,
+                                      decoration: const InputDecoration(
                                           border: OutlineInputBorder(),
                                           labelText: 'Страна'))),
-                              SizedBox(
+                              const SizedBox(
                                 width: 22,
                               ),
                               Expanded(
                                   child: TextField(
-                                      decoration: InputDecoration(
+                                      controller: regionController,
+                                      decoration: const InputDecoration(
                                           border: OutlineInputBorder(),
                                           labelText: 'Регион'))),
-                              SizedBox(
+                              const SizedBox(
                                 width: 22,
                               ),
                               Expanded(
                                   child: TextField(
-                                      decoration: InputDecoration(
+                                      controller: subRegionController,
+                                      decoration: const InputDecoration(
                                           border: OutlineInputBorder(),
                                           labelText: 'Субрегион')))
                             ],
@@ -479,8 +639,9 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
                           const SizedBox(
                             height: 16,
                           ),
-                          const TextField(
-                              decoration: InputDecoration(
+                          TextField(
+                              controller: geoCommentController,
+                              decoration: const InputDecoration(
                                   border: OutlineInputBorder(),
                                   labelText: 'Комментарий к геопозиции'))
                         ]))
@@ -494,8 +655,9 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
                 Expanded(
                     child: Container(
                         margin: const EdgeInsets.only(left: 74),
-                        child: const TextField(
-                            decoration: InputDecoration(
+                        child: TextField(
+                            controller: commentController,
+                            decoration: const InputDecoration(
                                 border: OutlineInputBorder(),
                                 labelText: 'Комментарий')))),
                 SizedBox(
@@ -511,7 +673,7 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
                           }),
                     )),
                 FilledButton.icon(
-                    onPressed: () {},
+                    onPressed: () {addNewItem(appState);},
                     icon: const Icon(Icons.add),
                     label: const Text("Добавить"))
               ],

@@ -1,3 +1,5 @@
+import 'dart:html';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_session_manager/flutter_session_manager.dart';
 import 'package:lab_gui_flutter/repository.dart';
@@ -17,6 +19,7 @@ import 'screens/add_item_collection_dialog.dart';
 import 'screens/topology_page.dart';
 
 void main() {
+  window.document.onContextMenu.listen((evt) => evt.preventDefault());
   runApp(const MainApp());
 }
 
