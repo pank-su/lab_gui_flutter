@@ -14,7 +14,11 @@ import '../main.dart';
 import '../models/voucher_institute.dart';
 
 class AddCollectionItemDialog extends StatefulWidget {
-  const AddCollectionItemDialog({super.key});
+  const AddCollectionItemDialog(
+      {super.key, required this.isUpdate, this.updatableId});
+
+  final bool isUpdate;
+  final int? updatableId;
 
   @override
   State<AddCollectionItemDialog> createState() =>
@@ -28,6 +32,8 @@ enum Age { adult, subadult, juvenil, Unknown }
 enum MapMode { point, polygon, notSet }
 
 class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
+  bool isUpdate = false;
+
   var _gender = Gender.Unknown;
   var _age = Age.Unknown;
   var _isRna = false;
@@ -59,10 +65,37 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
 
   Future<void> getInfo() async {
     // Получение идентифакторов и другой посредственной информации
-    var id = await getLastIdCollection() + 1;
-    idController.text = id.toString();
-    numberController.text = "ZIN-TER-M-${id + 4}";
     vauchInstitutes = await getVoucherInstitute();
+    if (!widget.isUpdate) {
+      var id = await getLastIdCollection() + 1;
+      idController.text = id.toString();
+      numberController.text = "ZIN-TER-M-${id + 4}";
+
+      return;
+    } 
+    var id = widget.updatableId!;
+    idController.text = id.toString();
+    var collectionItem = await getCollectionItemById(id);
+    numberController.text = collectionItem.catalogueNumber ?? "";
+    vauchController.text = collectionItem.scientificInstitute ?? "";
+    vauchIDController.text = collectionItem.voucherId ?? "";
+    latitudeController.text = collectionItem.latitude?.toString() ?? "";
+    longtitudeController.text = collectionItem.longitude?.toString() ?? "";
+    countryController.text = collectionItem.country ?? "";
+    regionController.text = collectionItem.region ?? "";
+    subRegionController.text = collectionItem.subregion ?? "";
+    geoCommentController.text = collectionItem.geoComment ?? "";
+    commentController.text = collectionItem.comment ?? "";
+    _isRna = collectionItem.rna ?? false;
+    setState(() {
+      point = LatLng(collectionItem.longitude ?? point.longitude, collectionItem.latitude ?? point.latitude);
+      if (collectionItem.latitude != null && collectionItem.longitude != null){
+        mapMode = MapMode.point;
+      }
+    });
+    var collectionDTO = await getCollectionDtoById(id);
+    _gender = Gender.values[collectionDTO.sexId ?? 0];
+    _age = Age.values[collectionDTO.ageId ?? 0];
   }
 
   final mapController = MapController();
@@ -85,23 +118,69 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
     subRegionController.text = reverseSearchResult.address?["county"] ?? "";
   }
 
+  Future<void> updateItem(MyAppState appState) async{
+    final topology = appState.selectedBaseModel!.getFullTopology();
+    String order = topology[0];
+    String family = "";
+    String genus = "";
+    String kind = "";
+
+    try {
+      String family = topology[1];
+      String genus = topology[2];
+      String kind = topology[3];
+    } on RangeError {
+      // cool block
+    }
+
+    List<List<String>> collectors = List.empty(growable: true);
+    for (var collector in appState.selectedCollectors) {
+      collectors.add([
+        collector.lastName ?? "",
+        collector.firstName ?? "",
+        collector.secondName ?? ""
+      ]);
+    }
+    await updateCollection(
+      col_id: widget.updatableId!,
+        catalogNumber: numberController.text,
+        collectId: collectIdController.text,
+        order: order,
+        family: family,
+        genus: genus,
+        kind: kind,
+        age: _age.name,
+        sex: _gender.name,
+        vauchInst: vauchController.text,
+        vauchId: vauchIDController.text,
+        point: "Point(${point.latitude} ${point.longitude})",
+        country: countryController.text,
+        region: regionController.text,
+        subregion: subRegionController.text,
+        geocomment: geoCommentController.text,
+        dateCollect: dateController.text,
+        comment: commentController.text,
+        collectors: collectors,
+        token: appState.token!,
+        rna: _isRna);
+  }
+
+
   Future<void> addNewItem(MyAppState appState) async {
     final topology = appState.selectedBaseModel!.getFullTopology();
     String order = topology[0];
     String family = "";
     String genus = "";
     String kind = "";
-    
 
-    try{
+    try {
       String family = topology[1];
       String genus = topology[2];
       String kind = topology[3];
-    } on RangeError{
+    } on RangeError {
       // cool block
     }
-    
-    
+
     List<List<String>> collectors = List.empty(growable: true);
     for (var collector in appState.selectedCollectors) {
       collectors.add([
@@ -673,9 +752,17 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
                           }),
                     )),
                 FilledButton.icon(
-                    onPressed: () {addNewItem(appState);},
+                    onPressed: () {
+                      if (widget.isUpdate){
+                        updateItem(appState);
+                        Navigator.pop(context);
+                        return;
+                      }
+                      addNewItem(appState);
+                      Navigator.pop(context);
+                    },
                     icon: const Icon(Icons.add),
-                    label: const Text("Добавить"))
+                    label: Text(widget.isUpdate ? "Обновить" : "Добавить"))
               ],
             ))
           ]),

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:lab_gui_flutter/models/base_model.dart';
+import 'package:lab_gui_flutter/models/collection_dto.dart';
 import 'package:lab_gui_flutter/models/collection_item.dart';
 import 'package:lab_gui_flutter/models/jwt.dart';
 
@@ -141,7 +142,6 @@ Future<User> getUserInfoByToken(String token) async {
   final response =
       await http.get(url, headers: {"Authorization": "Bearer $token"});
   if (response.statusCode == 200) {
-    print(response.body);
     return User.fromJson(response.body);
   } else {
     throw Exception("Network not found.");
@@ -153,7 +153,6 @@ Future<List<VoucherInstitute>> getVoucherInstitute() async {
   final response = await http.get(url);
 
   if (response.statusCode == 200) {
-    print(response.body);
     Iterable l = json.decode(response.body);
     List<VoucherInstitute> vis = List<VoucherInstitute>.from(
         l.map((vi) => VoucherInstitute.fromJson(vi)));
@@ -184,7 +183,6 @@ Future<void> addCollection({
   required List<List<String>> collectors,
   required String token,
   bool rna = false,
-  
 }) async {
   final url = Uri.http(URL, "rpc/add_collection");
 
@@ -206,13 +204,184 @@ Future<void> addCollection({
     'geocomment': geocomment,
     'date_collect': dateCollect,
     'comment': comment,
-    'collectors': '{${collectors.map((collector) => '{"${collector[0]}", "${collector[1]}", "${collector[2]}"}').join(', ')}}',
+    'collectors':
+        '{${collectors.map((collector) => '{"${collector[0]}", "${collector[1]}", "${collector[2]}"}').join(', ')}}',
     'rna': rna.toString(),
   };
-  final response = await http.post(
-    url,
-    body: body,
-    headers: {"Authorization": "Bearer $token"}
-  );
-  print(response.reasonPhrase);
+  final response = await http
+      .post(url, body: body, headers: {"Authorization": "Bearer $token"});
+}
+
+Future<void> updateCollection({
+  required int col_id,
+  required String catalogNumber,
+  required String collectId,
+  required String order,
+  required String family,
+  required String genus,
+  required String kind,
+  required String age,
+  required String sex,
+  required String vauchInst,
+  required String vauchId,
+  required String point,
+  required String country,
+  required String region,
+  required String subregion,
+  required String geocomment,
+  required String dateCollect,
+  required String comment,
+  required List<List<String>> collectors,
+  required String token,
+  bool rna = false,
+}) async {
+  final url = Uri.http(URL, "rpc/update_collection_by_id");
+
+  final body = {
+    'col_id': col_id.toString(),
+    'catalog_number': catalogNumber,
+    'collect_id': collectId,
+    'order': order,
+    'family': family,
+    'genus': genus,
+    'kind': kind,
+    'age': age,
+    'sex': sex,
+    'vauch_inst': vauchInst,
+    'vauch_id': vauchId,
+    'point': point,
+    'country': country,
+    'region': region,
+    'subregion': subregion,
+    'geocomment': geocomment,
+    'date_collect': dateCollect,
+    'comment': comment,
+    'collectors':
+        '{${collectors.map((collector) => '{"${collector[0]}", "${collector[1]}", "${collector[2]}"}').join(', ')}}',
+    'rna': rna.toString(),
+  };
+  final response = await http
+      .post(url, body: body, headers: {"Authorization": "Bearer $token"});
+  print(response.body);
+}
+
+Future<CollectionItem> getCollectionItemById(int id) async {
+  var url = Uri.http(URL, "basic_view", {"id": "eq.$id"});
+  final response = await http.get(url);
+
+  if (response.statusCode == 200) {
+    Iterable l = json.decode(response.body);
+    List<CollectionItem> collection = List<CollectionItem>.from(
+        l.map((model) => CollectionItem.fromJson(model)));
+    return collection[0];
+  }
+  throw Exception();
+}
+
+Future<CollectionDTO> getCollectionDtoById(int id) async {
+  var url = Uri.http(URL, "collection", {"id": "eq.$id"});
+  final response = await http.get(url);
+  if (response.statusCode == 200) {
+    Iterable l = json.decode(response.body);
+    List<CollectionDTO> collection = List<CollectionDTO>.from(
+        l.map((model) => CollectionDTO.fromJson(model)));
+    return collection[0];
+  }
+  throw Exception();
+}
+
+Future<Collector> getCollectorById(int id) async {
+  var url = Uri.http(URL, "collector", {"id": "eq.$id"});
+  final response = await http.get(url);
+  print(response.body);
+  if (response.statusCode == 200) {
+    Iterable l = json.decode(response.body);
+    List<Collector> collectors = List<Collector>.from(
+        l.map((collector) => Collector.fromJson(collector)));
+    return collectors[0];
+  }
+  throw Exception();
+}
+
+Future<List<Collector>> getCollectorsByColItemId(int id) async {
+  var url = Uri.http(URL, "collector_to_collection",
+      {"select": "collector_id", "collection_id": "eq.$id"});
+  final response = await http.get(url);
+
+  if (response.statusCode == 200) {
+    print(response.body);
+    Iterable l = json.decode(response.body);
+    List<int> collector_ids =
+        List<int>.from(l.map((e) => e["collector_id"] as int));
+    List<Collector> collectors = List.empty(growable: true);
+    for (int collector_id in collector_ids) {
+      collectors.add(await getCollectorById(collector_id));
+    }
+    return collectors;
+  }
+  throw Exception();
+}
+
+Future<int> getOrderIdByName(String name) async {
+  var url = Uri.http(URL, "order", {"select": "id", "name": "eq.$name"});
+  final response = await http.get(url);
+
+  if (response.statusCode == 200) {
+    Iterable l = json.decode(response.body);
+    List<int> order_ids = List<int>.from(l.map((e) => e["id"] as int));
+    return order_ids[0];
+  }
+  throw Exception();
+}
+
+Future<int> getFamilyIdByName(String name, int order_id) async {
+  var url = Uri.http(URL, "family",
+      {"select": "id", "name": "eq.$name", "order_id": "eq.$order_id"});
+  final response = await http.get(url);
+
+  if (response.statusCode == 200) {
+    Iterable l = json.decode(response.body);
+    List<int> family_ids = List<int>.from(l.map((e) => e["id"] as int));
+    return family_ids[0];
+  }
+  throw Exception();
+}
+
+Future<int> getGenusIdByName(String name, int family_id) async {
+  var url = Uri.http(URL, "genus",
+      {"select": "id", "name": "eq.$name", "family_id": "eq.$family_id"});
+  final response = await http.get(url);
+  print(response.body);
+  if (response.statusCode == 200) {
+    Iterable l = json.decode(response.body);
+    List<int> genus_ids = List<int>.from(l.map((e) => e["id"] as int));
+    return genus_ids[0];
+  }
+  throw Exception();
+}
+
+Future<int> getKindIdByName(String name, int genus_id) async {
+  var url = Uri.http(URL, "kind",
+      {"select": "id", "name": "eq.$name", "genus_id": "eq.$genus_id"});
+  final response = await http.get(url);
+  print(response.body);
+  if (response.statusCode == 200) {
+    Iterable l = json.decode(response.body);
+    List<int> kind_ids = List<int>.from(l.map((e) => e["id"] as int));
+    return kind_ids[0];
+  }
+  throw Exception();
+}
+
+Future<BaseModel> getBaseModelByNames(String orderName, String familyName,
+    String genusName, String kindName) async {
+  var orderId = await getOrderIdByName(orderName);
+  var familyId = await getFamilyIdByName(familyName, orderId);
+  var genusId = await getGenusIdByName(genusName, familyId);
+  var kindId = await getKindIdByName(kindName, genusId);
+
+  return (await getKindsById((await getGenusesById((await getFamiliesById((await getOrders())
+              .firstWhere((element) => element.id == orderId)))
+          .firstWhere((element) => element.id == familyId)))
+      .firstWhere((element) => element.id == genusId))).firstWhere((element) => element.id == kindId);
 }

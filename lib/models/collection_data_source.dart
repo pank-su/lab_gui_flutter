@@ -1,10 +1,18 @@
+import 'package:context_menus/context_menus.dart';
 import 'package:flutter/material.dart';
+import 'package:lab_gui_flutter/main.dart';
+import 'package:lab_gui_flutter/repository.dart';
+import 'package:lab_gui_flutter/screens/add_item_collection_dialog.dart';
+import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import 'collection_item.dart';
 
 class CollectionDataSource extends DataGridSource {
-  CollectionDataSource({required List<CollectionItem> collectionItems}) {
+  final BuildContext context;
+
+  CollectionDataSource(
+      {required List<CollectionItem> collectionItems, required this.context}) {
     _collectionItems = collectionItems
         .map<DataGridRow>((item) => DataGridRow(cells: [
               DataGridCell<int?>(columnName: 'id', value: item.id),
@@ -49,26 +57,56 @@ class CollectionDataSource extends DataGridSource {
 
   @override
   DataGridRowAdapter? buildRow(DataGridRow row) {
+    var appState = context.watch<MyAppState>();
     return DataGridRowAdapter(
         cells: row.getCells().map<Widget>((dataGridCell) {
       if (dataGridCell.columnName == 'rna') {
-        return Container(
-          alignment: Alignment.center,
-          child: Checkbox(
-            value: dataGridCell.value,
-            onChanged: null,
-          ),
-        );
+        return ContextMenuRegion(
+            contextMenu: GenericContextMenu(buttonConfigs: [
+              ContextMenuButtonConfig("Изменить", onPressed: () {
+                print(row.getCells().first.value);
+              })
+            ]),
+            child: Container(
+              alignment: Alignment.center,
+              child: Checkbox(
+                value: dataGridCell.value,
+                onChanged: null,
+              ),
+            ));
       }
-      return Container(
-        alignment: (dataGridCell.columnName == 'id' ||
-                dataGridCell.columnName == 'latitude' ||
-                dataGridCell.columnName == 'longitude')
-            ? Alignment.centerRight
-            : Alignment.centerLeft,
-        padding: const EdgeInsets.all(16.0),
-        child: Text(dataGridCell.value?.toString() ?? ''),
-      );
+      return ContextMenuRegion(
+          contextMenu: GenericContextMenu(buttonConfigs: [
+            ContextMenuButtonConfig("Изменить", onPressed: () {
+              var id = row.getCells().first.value as int;
+              getCollectorsByColItemId(id).then((value) {
+                appState.selectedCollectors = value;
+                notifyListeners();
+              });
+              getCollectionItemById(id).then((value) {
+                getBaseModelByNames(value.order!, value.family!, value.genus!,
+                        value.species!)
+                    .then((value) { appState.selectedBaseModel = value; notifyListeners();});
+              });
+              showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AddCollectionItemDialog(
+                      isUpdate: true,
+                      updatableId: id,
+                    );
+                  });
+            })
+          ]),
+          child: Container(
+            alignment: (dataGridCell.columnName == 'id' ||
+                    dataGridCell.columnName == 'latitude' ||
+                    dataGridCell.columnName == 'longitude')
+                ? Alignment.centerRight
+                : Alignment.centerLeft,
+            padding: const EdgeInsets.all(16.0),
+            child: Text(dataGridCell.value?.toString() ?? ''),
+          ));
     }).toList());
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:html';
 
+import 'package:context_menus/context_menus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_session_manager/flutter_session_manager.dart';
 import 'package:lab_gui_flutter/repository.dart';
@@ -175,7 +176,7 @@ class _MainPageState extends State<MainPage> {
                                 showDialog(
                                     context: context,
                                     builder: (context) {
-                                      return const AddCollectionItemDialog();
+                                      return const AddCollectionItemDialog(isUpdate: false,);
                                     });
                               },
                               child: const Icon(Icons.add),

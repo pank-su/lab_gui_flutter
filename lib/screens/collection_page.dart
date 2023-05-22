@@ -1,7 +1,9 @@
 import 'package:async/async.dart';
+import 'package:context_menus/context_menus.dart';
 import 'package:flutter/material.dart';
 import 'package:lab_gui_flutter/models/collection_item.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
+
 
 import '../models/collection_data_source.dart';
 import '../repository.dart';
@@ -253,7 +255,7 @@ class _CollectionPageState extends State<CollectionPage> {
                 child: const Icon(Icons.arrow_downward),
               ),
               body: SelectionArea(
-                  child: SfDataGrid(
+                  child: ContextMenuOverlay(child: SfDataGrid(
                       controller: _controller,
                       frozenColumnsCount: 1,
                       columnWidthMode: ColumnWidthMode.auto,
@@ -275,8 +277,8 @@ class _CollectionPageState extends State<CollectionPage> {
                         return true;
                       },
                       source:
-                          CollectionDataSource(collectionItems: snapshot.data!),
-                      columns: columns)));
+                          CollectionDataSource(collectionItems: snapshot.data!, context: context),
+                      columns: columns))));
         } else {
           return const Center(
               child: Column(

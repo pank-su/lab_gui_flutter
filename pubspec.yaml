@@ -20,6 +20,7 @@ dependencies:
   flutter_map: ^4.0.0
   latlong2: ^0.8.1
   osm_nominatim: ^2.0.1
+  context_menus: ^1.0.2
   flutter_localizations:
     sdk: flutter
 
