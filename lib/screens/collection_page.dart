@@ -1,7 +1,5 @@
-import 'package:async/async.dart';
 import 'package:context_menus/context_menus.dart';
 import 'package:flutter/material.dart';
-import 'package:lab_gui_flutter/models/collection_item.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
@@ -17,7 +15,6 @@ class CollectionPage extends StatefulWidget {
 }
 
 class _CollectionPageState extends State<CollectionPage> {
-  final AsyncMemoizer _memoizer = AsyncMemoizer();
 
   Future<void> _updateCollection(MyAppState appState) async {
     appState.collection = await getCollection();
@@ -252,7 +249,6 @@ class _CollectionPageState extends State<CollectionPage> {
 
     var appState = context.watch<MyAppState>();
     if (appState.isRestart || appState.collection.isEmpty) {
-      
       _updateCollection(appState);
       return const Center(
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -264,12 +260,7 @@ class _CollectionPageState extends State<CollectionPage> {
       ]));
     }
 
-    return Scaffold(
-        floatingActionButton: FloatingActionButton.small(
-          onPressed: null,
-          child: const Icon(Icons.arrow_downward),
-        ),
-        body: ContextMenuOverlay(
+    return  ContextMenuOverlay(
             child: SfDataGrid(
           controller: _controller,
           //allowFiltering: true,
@@ -295,6 +286,6 @@ class _CollectionPageState extends State<CollectionPage> {
           },
           source: CollectionDataSource(
               collectionItems: appState.collection, context: context),
-        )));
+        ));
   }
 }

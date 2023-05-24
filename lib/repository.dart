@@ -17,8 +17,6 @@ Future<Jwt> login(String login, String password) async {
 
   final response =
       await http.post(url, body: {'login': login, 'pass': password});
-  print(response.body);
-
   if (response.statusCode == 200) {
     return Jwt.fromJson(response.body);
   } else {

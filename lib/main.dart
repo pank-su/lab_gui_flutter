@@ -72,10 +72,13 @@ class _MainPageState extends State<MainPage> {
         defaultElavation);
 
     Widget page;
+    Widget dialog = const Dialog();
+    
 
     switch (selectedIndex) {
       case 0:
         page = const CollectionPage();
+        dialog = const AddCollectionItemDialog(isUpdate: false,);
         break;
       case 1:
         page = const TopologyPage(selectableMode: false,);
@@ -127,7 +130,7 @@ class _MainPageState extends State<MainPage> {
                                 showDialog(
                                     context: context,
                                     builder: (context) {
-                                      return const AddCollectionItemDialog(isUpdate: false,);
+                                      return dialog;
                                     });
                               },
                               child: const Icon(Icons.add),
