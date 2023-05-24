@@ -6,6 +6,7 @@ import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import '../main.dart';
 import '../models/collector_data_source.dart';
+import '../my_app_state.dart';
 import '../repository.dart';
 
 class CollectorsPage extends StatefulWidget {

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+// Цветовые темы
+
 const lightColorScheme = ColorScheme(
   brightness: Brightness.light,
   primary: Color(0xFF006590),

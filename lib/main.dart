@@ -1,78 +1,27 @@
-import 'dart:html';
-
-import 'package:context_menus/context_menus.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:flutter_session_manager/flutter_session_manager.dart';
-import 'package:lab_gui_flutter/repository.dart';
+import 'package:lab_gui_flutter/my_app_state.dart';
 import 'package:lab_gui_flutter/screens/auth.dart';
 import 'package:lab_gui_flutter/screens/collection_page.dart';
 import 'package:lab_gui_flutter/screens/collectors.dart';
+import 'package:lab_gui_flutter/web_settings.dart';
 import 'package:provider/provider.dart';
 import 'package:side_sheet_material3/side_sheet_material3.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import 'color_schemes.g.dart';
-import 'models/base_model.dart';
-import 'models/collector.dart';
-import 'models/jwt.dart';
+
 import 'screens/add_item_collection_dialog.dart';
 import 'screens/topology_page.dart';
 
 void main() {
-  window.document.onContextMenu.listen((evt) => evt.preventDefault());
+  if (kIsWeb){
+    webSet();
+  }
   runApp(const MainApp());
+
 }
 
-class MyAppState extends ChangeNotifier {
-  var isAuth = false;
-  String? token;
-
-  BaseModel? selectedBaseModel;
-  List<Collector> selectedCollectors = List.empty(growable: true);
-
-  void setSelectedBaseModel(BaseModel? baseModel){
-    selectedBaseModel = baseModel;
-    notifyListeners();
-  }
-
-  Future<void> setSelectedCollectors(List<DataGridRow> collectorsRows) async{
-    var collectors = await getCollectors();
-    selectedCollectors.clear();
-    for (var el in collectorsRows){
-      selectedCollectors.add(collectors.firstWhere((element) => element.id == el.getCells().first.value));
-       }
-    notifyListeners();
-  }
-
-  Future<void> checkToken() async {
-    token = await SessionManager().get("token");
-    if (token != null && token != "") {
-      try {
-        testRequest(token!);
-        isAuth = true;
-      } on Exception {
-        await logout();
-      }
-    }
-    notifyListeners();
-  }
-
-  Future<void> auth(String login_, String password) async {
-    Jwt jwt = await login(login_, password);
-    token = jwt.token;
-    await SessionManager().set("token", token);
-    isAuth = true;
-    notifyListeners();
-  }
-
-  Future<void> logout() async {
-    token = null;
-    isAuth = false;
-    await SessionManager().set("token", "");
-    notifyListeners();
-  }
-}
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});

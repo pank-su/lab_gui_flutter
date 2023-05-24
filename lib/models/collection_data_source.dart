@@ -1,13 +1,13 @@
 import 'package:context_menus/context_menus.dart';
 import 'package:flutter/material.dart';
-import 'package:lab_gui_flutter/main.dart';
-import 'package:lab_gui_flutter/repository.dart';
 import 'package:lab_gui_flutter/screens/add_item_collection_dialog.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
+import '../my_app_state.dart';
 import 'collection_item.dart';
 
+/// Источник данных для таблицы
 class CollectionDataSource extends DataGridSource {
   final BuildContext context;
 
@@ -60,34 +60,12 @@ class CollectionDataSource extends DataGridSource {
     var appState = context.watch<MyAppState>();
     return DataGridRowAdapter(
         cells: row.getCells().map<Widget>((dataGridCell) {
-      if (dataGridCell.columnName == 'rna') {
-        return ContextMenuRegion(
-            contextMenu: GenericContextMenu(buttonConfigs: [
-              ContextMenuButtonConfig("Изменить", onPressed: () {
-                print(row.getCells().first.value);
-              })
-            ]),
-            child: Container(
-              alignment: Alignment.center,
-              child: Checkbox(
-                value: dataGridCell.value,
-                onChanged: null,
-              ),
-            ));
-      }
       return ContextMenuRegion(
           contextMenu: GenericContextMenu(buttonConfigs: [
             ContextMenuButtonConfig("Изменить", onPressed: () {
               var id = row.getCells().first.value as int;
-              getCollectorsByColItemId(id).then((value) {
-                appState.selectedCollectors = value;
-                notifyListeners();
-              });
-              getCollectionItemById(id).then((value) {
-                getBaseModelByNames(value.order!, value.family!, value.genus!,
-                        value.species!)
-                    .then((value) { appState.selectedBaseModel = value; notifyListeners();});
-              });
+              appState.setSelectedCollectorsById(id);
+              appState.setTopologyByColId(id);
               showDialog(
                   context: context,
                   builder: (context) {
@@ -98,14 +76,27 @@ class CollectionDataSource extends DataGridSource {
                   });
             })
           ]),
-          child: Container(
-            alignment: (dataGridCell.columnName == 'id' ||
-                    dataGridCell.columnName == 'latitude' ||
-                    dataGridCell.columnName == 'longitude')
-                ? Alignment.centerRight
-                : Alignment.centerLeft,
-            padding: const EdgeInsets.all(16.0),
-            child: Text(dataGridCell.value?.toString() ?? ''),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              if (dataGridCell.columnName == 'rna') {
+                return Container(
+                  alignment: Alignment.center,
+                  child: Checkbox(
+                    value: dataGridCell.value,
+                    onChanged: null,
+                  ),
+                );
+              }
+              return Container(
+                alignment: (dataGridCell.columnName == 'id' ||
+                        dataGridCell.columnName == 'latitude' ||
+                        dataGridCell.columnName == 'longitude')
+                    ? Alignment.centerRight
+                    : Alignment.centerLeft,
+                padding: const EdgeInsets.all(16.0),
+                child: Text(dataGridCell.value?.toString() ?? ''),
+              );
+            },
           ));
     }).toList());
   }

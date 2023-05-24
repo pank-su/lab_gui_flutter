@@ -18,6 +18,8 @@ class CollectionPage extends StatefulWidget {
 class _CollectionPageState extends State<CollectionPage> {
   final AsyncMemoizer _memoizer = AsyncMemoizer();
 
+  
+
   Future<List<CollectionItem>> _future() async {
     return await _memoizer.runOnce(() async => await getCollection())
         as List<CollectionItem>;

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
+import 'package:lab_gui_flutter/my_app_state.dart';
 import 'package:provider/provider.dart';
 
-import '../main.dart';
 import '../models/base_model.dart';
 import '../repository.dart';
 

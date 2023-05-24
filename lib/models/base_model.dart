@@ -1,5 +1,10 @@
 enum BaseModelsTypes { order, family, genus, kind, father }
 
+/// Класс который работает с топологией
+/// [id] - идентификатор
+/// [name] - название
+/// [type] - тип
+/// [parent] - отец
 class BaseModel {
   int id;
   String? name;
@@ -21,6 +26,7 @@ class BaseModel {
     return data;
   }
 
+  /// Получение списка топологии
   List<String> getFullTopology(){
     var first = this;
     List<String> topology = List.empty(growable: true);

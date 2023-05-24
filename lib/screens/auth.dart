@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:lab_gui_flutter/my_app_state.dart';
 import 'package:lab_gui_flutter/repository.dart';
 import 'package:provider/provider.dart';
 
-import '../main.dart';
 import '../models/user.dart';
 
 class AuthScreen extends StatefulWidget {

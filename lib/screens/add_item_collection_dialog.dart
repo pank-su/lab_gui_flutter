@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:lab_gui_flutter/my_app_state.dart';
 import 'package:lab_gui_flutter/repository.dart';
 import 'package:intl/intl.dart';
 import 'package:lab_gui_flutter/screens/collectors.dart';
@@ -10,7 +11,6 @@ import 'package:provider/provider.dart';
 
 import 'package:osm_nominatim/osm_nominatim.dart';
 
-import '../main.dart';
 import '../models/voucher_institute.dart';
 
 class AddCollectionItemDialog extends StatefulWidget {
@@ -94,8 +94,13 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
       }
     });
     var collectionDTO = await getCollectionDtoById(id);
-    _gender = Gender.values[collectionDTO.sexId ?? 0];
-    _age = Age.values[collectionDTO.ageId ?? 0];
+    try{
+      _age = Age.values[collectionDTO.ageId ?? 0];
+      _gender = Gender.values[collectionDTO.sexId ?? 0];
+      
+    } on RangeError{
+      // Если года неправильные
+    }
   }
 
   final mapController = MapController();
@@ -126,9 +131,9 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
     String kind = "";
 
     try {
-      String family = topology[1];
-      String genus = topology[2];
-      String kind = topology[3];
+      family = topology[1];
+      genus = topology[2];
+      kind = topology[3];
     } on RangeError {
       // cool block
     }
@@ -174,9 +179,9 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
     String kind = "";
 
     try {
-      String family = topology[1];
-      String genus = topology[2];
-      String kind = topology[3];
+      family = topology[1];
+      genus = topology[2];
+      kind = topology[3];
     } on RangeError {
       // cool block
     }
