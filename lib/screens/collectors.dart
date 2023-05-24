@@ -68,7 +68,10 @@ class _CollectorsPageState extends State<CollectorsPage> {
           future: getCollectors(),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              return  SfDataGrid(
+              return SfDataGrid(
+                  allowFiltering: true,
+                  allowSorting: true,
+                  allowMultiColumnSorting: true,
                   controller: _dataGridController,
                   selectionMode: SelectionMode.multiple,
                   source: CollectorDataSource(snapshot.data!),
@@ -85,8 +88,8 @@ class _CollectorsPageState extends State<CollectorsPage> {
                   child: FilledButton(
                       onPressed: true
                           ? () {
-                              appState
-                                  .setSelectedCollectors(_dataGridController.selectedRows);
+                              appState.setSelectedCollectors(
+                                  _dataGridController.selectedRows);
                               Navigator.pop(context);
                             }
                           : null,
