@@ -309,10 +309,10 @@ Future<List<Collector>> getCollectorsByColItemId(int id) async {
   if (response.statusCode == 200) {
     print(response.body);
     Iterable l = json.decode(response.body);
-    List<int> collector_ids =
+    List<int> collectorIds =
         List<int>.from(l.map((e) => e["collector_id"] as int));
     List<Collector> collectors = List.empty(growable: true);
-    for (int collector_id in collector_ids) {
+    for (int collector_id in collectorIds) {
       collectors.add(await getCollectorById(collector_id));
     }
     return collectors;
@@ -326,47 +326,45 @@ Future<int> getOrderIdByName(String name) async {
 
   if (response.statusCode == 200) {
     Iterable l = json.decode(response.body);
-    List<int> order_ids = List<int>.from(l.map((e) => e["id"] as int));
-    return order_ids[0];
+    List<int> orderIds = List<int>.from(l.map((e) => e["id"] as int));
+    return orderIds[0];
   }
   throw Exception();
 }
 
-Future<int> getFamilyIdByName(String name, int order_id) async {
+Future<int> getFamilyIdByName(String name, int orderId) async {
   var url = Uri.http(URL, "family",
-      {"select": "id", "name": "eq.$name", "order_id": "eq.$order_id"});
+      {"select": "id", "name": "eq.$name", "order_id": "eq.$orderId"});
   final response = await http.get(url);
 
   if (response.statusCode == 200) {
     Iterable l = json.decode(response.body);
-    List<int> family_ids = List<int>.from(l.map((e) => e["id"] as int));
-    return family_ids[0];
+    List<int> familyIds = List<int>.from(l.map((e) => e["id"] as int));
+    return familyIds[0];
   }
   throw Exception();
 }
 
-Future<int> getGenusIdByName(String name, int family_id) async {
+Future<int> getGenusIdByName(String name, int familyId) async {
   var url = Uri.http(URL, "genus",
-      {"select": "id", "name": "eq.$name", "family_id": "eq.$family_id"});
+      {"select": "id", "name": "eq.$name", "family_id": "eq.$familyId"});
   final response = await http.get(url);
-  print(response.body);
   if (response.statusCode == 200) {
     Iterable l = json.decode(response.body);
-    List<int> genus_ids = List<int>.from(l.map((e) => e["id"] as int));
-    return genus_ids[0];
+    List<int> genusIds = List<int>.from(l.map((e) => e["id"] as int));
+    return genusIds[0];
   }
   throw Exception();
 }
 
-Future<int> getKindIdByName(String name, int genus_id) async {
+Future<int> getKindIdByName(String name, int genusId) async {
   var url = Uri.http(URL, "kind",
-      {"select": "id", "name": "eq.$name", "genus_id": "eq.$genus_id"});
+      {"select": "id", "name": "eq.$name", "genus_id": "eq.$genusId"});
   final response = await http.get(url);
-  print(response.body);
   if (response.statusCode == 200) {
     Iterable l = json.decode(response.body);
-    List<int> kind_ids = List<int>.from(l.map((e) => e["id"] as int));
-    return kind_ids[0];
+    List<int> kindIds = List<int>.from(l.map((e) => e["id"] as int));
+    return kindIds[0];
   }
   throw Exception();
 }
@@ -378,8 +376,34 @@ Future<BaseModel> getBaseModelByNames(String orderName, String familyName,
   var genusId = await getGenusIdByName(genusName, familyId);
   var kindId = await getKindIdByName(kindName, genusId);
 
-  return (await getKindsById((await getGenusesById((await getFamiliesById((await getOrders())
-              .firstWhere((element) => element.id == orderId)))
-          .firstWhere((element) => element.id == familyId)))
-      .firstWhere((element) => element.id == genusId))).firstWhere((element) => element.id == kindId);
+  return (await getKindsById((await getGenusesById((await getFamiliesById(
+                  (await getOrders())
+                      .firstWhere((element) => element.id == orderId)))
+              .firstWhere((element) => element.id == familyId)))
+          .firstWhere((element) => element.id == genusId)))
+      .firstWhere((element) => element.id == kindId);
+}
+
+Future<int> getLastCollectorId() async {
+  var url = Uri.http(
+      URL, 'collector', {"select": "id", "limit": "1", "order": "id.desc"});
+  final response = await http.get(url);
+  if (response.statusCode == 200) {
+    Iterable l = json.decode(response.body);
+    return l.first["id"] as int;
+  } else {
+    throw Exception("Network not found.");
+  }
+}
+
+Future<void> addCollector(
+    String lastName, String firstName, String secondName, String token) async {
+  var url = Uri.http(URL, 'collector');
+  final body = {
+    'last_name': lastName,
+    'first_name': firstName,
+    'second_name': secondName
+  };
+  final response = await http.post(url, body: body, headers: {"Authorization": "Bearer $token"});
+  print(response.body);
 }

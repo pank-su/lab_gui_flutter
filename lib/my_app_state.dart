@@ -103,7 +103,7 @@ class MyAppState extends ChangeNotifier {
 
   Future<void> autoUpdate() async{
     while(true){
-      await Future.delayed(Duration(minutes: 10));
+      await Future.delayed(const Duration(minutes: 10));
       restartNow();
     }
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:lab_gui_flutter/my_app_state.dart';
+import 'package:lab_gui_flutter/screens/add_collector.dart';
 import 'package:lab_gui_flutter/screens/auth.dart';
 import 'package:lab_gui_flutter/screens/collection_page.dart';
 import 'package:lab_gui_flutter/screens/collectors.dart';
@@ -85,6 +86,7 @@ class _MainPageState extends State<MainPage> {
         break;
       case 2:
         page = const CollectorsPage(selectableMode: false);
+        dialog = const AddCollector();
         break;
       default:
         throw UnimplementedError("page not found");
