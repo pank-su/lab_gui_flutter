@@ -1,10 +1,8 @@
-import 'package:context_menus/context_menus.dart';
 import 'package:flutter/material.dart';
 import 'package:lab_gui_flutter/models/collector.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
-import '../main.dart';
 import '../models/collector_data_source.dart';
 import '../my_app_state.dart';
 import '../repository.dart';

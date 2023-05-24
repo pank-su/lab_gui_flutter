@@ -4,7 +4,7 @@ import 'package:lab_gui_flutter/my_app_state.dart';
 import 'package:lab_gui_flutter/screens/auth.dart';
 import 'package:lab_gui_flutter/screens/collection_page.dart';
 import 'package:lab_gui_flutter/screens/collectors.dart';
-import 'package:lab_gui_flutter/web_settings.dart';
+//import 'package:lab_gui_flutter/web_settings.dart';
 import 'package:provider/provider.dart';
 import 'package:side_sheet_material3/side_sheet_material3.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -16,7 +16,7 @@ import 'screens/topology_page.dart';
 
 void main() {
   if (kIsWeb){
-    webSet();
+    //webSet();
   }
   runApp(const MainApp());
 
@@ -29,6 +29,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appState = MyAppState();
+    appState.autoUpdate();
     appState.checkToken();
     return ChangeNotifierProvider(
       create: (context) => appState,
@@ -63,6 +64,7 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
+    
     var theme = Theme.of(context);
     var surfaceContainer = ElevationOverlay.applySurfaceTint(
         theme.colorScheme.surface,
@@ -150,7 +152,7 @@ class _MainPageState extends State<MainPage> {
                             label: Text("Топология")),
                         NavigationRailDestination(
                             icon: Icon(Icons.person_4_outlined),
-                            label: Text("Сборщики"))
+                            label: Text("Коллекторы"))
                       ],
                     ))),
             const VerticalDivider(thickness: 1, width: 1),

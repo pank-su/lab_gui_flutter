@@ -2,10 +2,11 @@ import 'package:async/async.dart';
 import 'package:context_menus/context_menus.dart';
 import 'package:flutter/material.dart';
 import 'package:lab_gui_flutter/models/collection_item.dart';
+import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
-
 import '../models/collection_data_source.dart';
+import '../my_app_state.dart';
 import '../repository.dart';
 
 class CollectionPage extends StatefulWidget {
@@ -18,11 +19,9 @@ class CollectionPage extends StatefulWidget {
 class _CollectionPageState extends State<CollectionPage> {
   final AsyncMemoizer _memoizer = AsyncMemoizer();
 
-  
-
-  Future<List<CollectionItem>> _future() async {
-    return await _memoizer.runOnce(() async => await getCollection())
-        as List<CollectionItem>;
+  Future<void> _updateCollection(MyAppState appState) async {
+    appState.collection = await getCollection();
+    appState.finishRestart();
   }
 
   late Map<String, double> columnWidthsCollection = {
@@ -50,6 +49,11 @@ class _CollectionPageState extends State<CollectionPage> {
   };
 
   final DataGridController _controller = DataGridController();
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -246,55 +250,51 @@ class _CollectionPageState extends State<CollectionPage> {
       )
     ];
 
-    return FutureBuilder(
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return Scaffold(
-              floatingActionButton: FloatingActionButton.small(
-                onPressed: () {
-                  _controller.scrollToRow(snapshot.data!.length - 1);
-                },
-                child: const Icon(Icons.arrow_downward),
-              ),
-              body: SelectionArea(
-                  child: ContextMenuOverlay(child: SfDataGrid(
-                      controller: _controller,
-                      frozenColumnsCount: 1,
-                      columnWidthMode: ColumnWidthMode.auto,
-                      columnWidthCalculationRange:
-                          ColumnWidthCalculationRange.visibleRows,
-                      selectionMode: SelectionMode.multiple,
-                      allowColumnsResizing: true,
-                      columnResizeMode: ColumnResizeMode.onResizeEnd,
-                      isScrollbarAlwaysShown: true,
-                      onColumnResizeUpdate:
-                          (ColumnResizeUpdateDetails details) {
-                        if (details.width < 30) {
-                          return false;
-                        }
-                        setState(() {
-                          columnWidthsCollection[details.column.columnName] =
-                              details.width;
-                        });
-                        return true;
-                      },
-                      source:
-                          CollectionDataSource(collectionItems: snapshot.data!, context: context),
-                      columns: columns))));
-        } else {
-          return const Center(
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                CircularProgressIndicator(),
-                SizedBox(
-                  height: 10,
-                ),
-                Text("Подождите, происходит загрузка данных...")
-              ]));
-        }
-      },
-      future: _future(),
-    );
+    var appState = context.watch<MyAppState>();
+    if (appState.isRestart || appState.collection.isEmpty) {
+      
+      _updateCollection(appState);
+      return const Center(
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        CircularProgressIndicator(),
+        SizedBox(
+          height: 10,
+        ),
+        Text("Подождите, происходит загрузка данных...")
+      ]));
+    }
+
+    return Scaffold(
+        floatingActionButton: FloatingActionButton.small(
+          onPressed: null,
+          child: const Icon(Icons.arrow_downward),
+        ),
+        body: ContextMenuOverlay(
+            child: SfDataGrid(
+          controller: _controller,
+          //allowFiltering: true,
+          frozenColumnsCount: 1,
+          columnWidthMode: ColumnWidthMode.auto,
+          columnWidthCalculationRange: ColumnWidthCalculationRange.visibleRows,
+          selectionMode: SelectionMode.multiple,
+          allowColumnsResizing: true,
+          allowFiltering: true,
+          allowSorting: true,
+          allowMultiColumnSorting: true,
+          columnResizeMode: ColumnResizeMode.onResizeEnd,
+          isScrollbarAlwaysShown: true,
+          columns: columns,
+          onColumnResizeUpdate: (ColumnResizeUpdateDetails details) {
+            if (details.width < 30) {
+              return false;
+            }
+            setState(() {
+              columnWidthsCollection[details.column.columnName] = details.width;
+            });
+            return true;
+          },
+          source: CollectionDataSource(
+              collectionItems: appState.collection, context: context),
+        )));
   }
 }

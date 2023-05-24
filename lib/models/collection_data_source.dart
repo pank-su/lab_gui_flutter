@@ -57,12 +57,12 @@ class CollectionDataSource extends DataGridSource {
 
   @override
   DataGridRowAdapter? buildRow(DataGridRow row) {
-    var appState = context.watch<MyAppState>();
+    var appState = Provider.of<MyAppState>(context, listen: false); // Прошлушивание не нужно
     return DataGridRowAdapter(
         cells: row.getCells().map<Widget>((dataGridCell) {
       return ContextMenuRegion(
           contextMenu: GenericContextMenu(buttonConfigs: [
-            ContextMenuButtonConfig("Изменить", onPressed: () {
+            ContextMenuButtonConfig("Изменить", onPressed: !appState.isAuth ? null : () {
               var id = row.getCells().first.value as int;
               appState.setSelectedCollectorsById(id);
               appState.setTopologyByColId(id);

@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:collection/collection.dart';
 
-// @immutable
 class Jwt {
   final String? token;
 

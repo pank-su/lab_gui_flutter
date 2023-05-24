@@ -144,7 +144,7 @@ Future<User> getUserInfoByToken(String token) async {
   if (response.statusCode == 200) {
     return User.fromJson(response.body);
   } else {
-    throw Exception("Network not found.");
+    throw Exception("Token is expired");
   }
 }
 

@@ -3,6 +3,7 @@ import 'package:flutter_session_manager/flutter_session_manager.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import 'models/base_model.dart';
+import 'models/collection_item.dart';
 import 'models/collector.dart';
 import 'models/jwt.dart';
 import 'repository.dart';
@@ -15,6 +16,11 @@ class MyAppState extends ChangeNotifier {
   // Добавление изменение
   BaseModel? selectedBaseModel;
   List<Collector> selectedCollectors = List.empty(growable: true);
+
+  Future<void> resetSelected() async{
+    selectedBaseModel = null;
+    selectedCollectors = List.empty(growable: true);
+  }
 
   /// Получение коллекторов по [id] записи коллекции
   Future<void> setSelectedCollectorsById(int id) async {
@@ -79,4 +85,27 @@ class MyAppState extends ChangeNotifier {
     await SessionManager().set("token", "");
     notifyListeners();
   }
+
+  // Для обновление всех таблиц
+  var isRestart = true;
+
+  Future<void> restartNow() async{
+    isRestart = true;
+    notifyListeners();
+  }
+
+  Future<void> finishRestart() async{
+    isRestart = false;
+    notifyListeners();
+  }
+
+  List<CollectionItem> collection = List.empty();
+
+  Future<void> autoUpdate() async{
+    while(true){
+      await Future.delayed(Duration(minutes: 10));
+      restartNow();
+    }
+  }
+  
 }

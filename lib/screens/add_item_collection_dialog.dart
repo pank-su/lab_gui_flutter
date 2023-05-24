@@ -72,7 +72,7 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
       numberController.text = "ZIN-TER-M-${id + 4}";
 
       return;
-    } 
+    }
     var id = widget.updatableId!;
     idController.text = id.toString();
     var collectionItem = await getCollectionItemById(id);
@@ -88,19 +88,24 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
     commentController.text = collectionItem.comment ?? "";
     _isRna = collectionItem.rna ?? false;
     setState(() {
-      point = LatLng(collectionItem.longitude ?? point.longitude, collectionItem.latitude ?? point.latitude);
-      if (collectionItem.latitude != null && collectionItem.longitude != null){
+      point = LatLng(collectionItem.latitude ?? point.latitude,
+          collectionItem.longitude ?? point.longitude);
+      if (collectionItem.latitude != null && collectionItem.longitude != null) {
         mapMode = MapMode.point;
+        mapController.move(point, 10);
       }
     });
+
     var collectionDTO = await getCollectionDtoById(id);
-    try{
-      _age = Age.values[collectionDTO.ageId ?? 0];
-      _gender = Gender.values[collectionDTO.sexId ?? 0];
-      
-    } on RangeError{
+    try {
+      setState(() {
+        _age = Age.values[collectionDTO.ageId ?? 0];
+        _gender = Gender.values[collectionDTO.sexId ?? 0];
+      });
+    } on RangeError {
       // Если года неправильные
     }
+    
   }
 
   final mapController = MapController();
@@ -123,8 +128,9 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
     subRegionController.text = reverseSearchResult.address?["county"] ?? "";
   }
 
-  Future<void> updateItem(MyAppState appState) async{
+  Future<void> updateItem(MyAppState appState) async {
     final topology = appState.selectedBaseModel!.getFullTopology();
+    print(topology);
     String order = topology[0];
     String family = "";
     String genus = "";
@@ -147,7 +153,7 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
       ]);
     }
     await updateCollection(
-      col_id: widget.updatableId!,
+        col_id: widget.updatableId!,
         catalogNumber: numberController.text,
         collectId: collectIdController.text,
         order: order,
@@ -168,8 +174,8 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
         collectors: collectors,
         token: appState.token!,
         rna: _isRna);
+    appState.restartNow();
   }
-
 
   Future<void> addNewItem(MyAppState appState) async {
     final topology = appState.selectedBaseModel!.getFullTopology();
@@ -177,6 +183,7 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
     String family = "";
     String genus = "";
     String kind = "";
+    print(topology);
 
     try {
       family = topology[1];
@@ -215,6 +222,7 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
         collectors: collectors,
         token: appState.token!,
         rna: _isRna);
+    appState.restartNow();
   }
 
   @override
@@ -412,6 +420,7 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
                                             Icons.keyboard_arrow_down))),
                               );
                             },
+                            // Существует баг с размером autocomplete, это попытка его исправить
                             optionsViewBuilder: (context, onSelected, options) {
                               final textFieldBox = _textFieldKey.currentContext!
                                   .findRenderObject() as RenderBox;
@@ -758,7 +767,7 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
                     )),
                 FilledButton.icon(
                     onPressed: () {
-                      if (widget.isUpdate){
+                      if (widget.isUpdate) {
                         updateItem(appState);
                         Navigator.pop(context);
                         return;
