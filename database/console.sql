@@ -10,8 +10,8 @@ SELECT collection.id         AS ID,
        sex.name              as Пол,
        vi.name               as "Вауч. институт",
        vouch_id              as "Ваучерный ID",
-       ST_X(point::geometry) as Latitude,
-       ST_Y(point::geometry) as Longtitude,
+       ST_Y(point::geometry) as Latitude,
+       ST_X(point::geometry) as Longtitude,
        country.name          as Страна,
        region.name           as Регион,
        subregion.name        as Субрегион,
@@ -24,7 +24,8 @@ SELECT collection.id         AS ID,
            END               AS Дата,
        rna                   as RNA,
        comment               AS "Комментарий",
-       string_agg(c.last_name, ', ')
+       string_agg(c.last_name, ', ') AS "Коллекторы",
+       file_url IS NOT NULL as "Файл"
 FROM collection
          JOIN kind on kind.id = collection.kind_id
          JOIN genus on genus.id = kind.genus_id
@@ -43,6 +44,8 @@ GROUP BY collection.id, order_.name, family.name, genus.name, kind.name, age.nam
 ORDER BY collection.id;
 
 
+
+DROP VIEW basic_view;
 
 SELECT *
 from basic_view;
@@ -299,7 +302,7 @@ END;
 $$;
 ;
 
-DROP PROCEDURE add_collection;
+-- DROP PROCEDURE add_collection;
 
 CALL add_collection(catalog_number := 'test', collect_id := 'test', "order" := 'test', family := 'test',
                     genus := 'test', kind := 'test', age := 'test', sex := 'test', vauch_inst := 'test',
@@ -408,6 +411,7 @@ SELECT collectors_test('{{"a", "b", "c"}, {"a", NULL, NULL}}');
 
 DROP FUNCTION collectors_test;
 
+
 -- Перезагрузка seqeunсов
 ALTER SEQUENCE collector_id_seq RESTART 261;
 
@@ -433,6 +437,7 @@ ALTER SEQUENCE collection_id_seq RESTART 6069;
 create role web_anon nologin;
 grant usage on schema public to web_anon;
 grant select on all tables in schema public to web_anon;
+grant select on basic_view to web_anon;
 grant execute on function public.login(text, text) to web_anon;
 
 -- работник лаборатории, может выполнять процедуры, что позволяет ему изменять базу данных
@@ -641,3 +646,4 @@ $$ LANGUAGE plpgsql;
 grant execute on function test() to lab_worker;
 grant execute on function test() to head_lab;
 revoke execute on function test() from web_anon;
+
