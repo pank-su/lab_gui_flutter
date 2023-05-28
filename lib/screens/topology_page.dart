@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:lab_gui_flutter/my_app_state.dart';
+import 'package:lab_gui_flutter/screens/add_topology_dialog.dart';
 import 'package:provider/provider.dart';
 
 import '../models/base_model.dart';
@@ -65,7 +66,6 @@ class _TopologyPageState extends State<TopologyPage> {
 
     final List<BaseModel>? children = childrenMap[baseModel];
 
-
     if (baseModel.name != null &&
         baseModel.type != BaseModelsTypes.kind &&
         children == null) {
@@ -98,7 +98,7 @@ class _TopologyPageState extends State<TopologyPage> {
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
-    if (widget.selectableMode && !firstSelect){
+    if (widget.selectableMode && !firstSelect) {
       setState(() {
         selectableBaseModel = appState.selectedBaseModel;
         firstSelect = true;
@@ -109,13 +109,48 @@ class _TopologyPageState extends State<TopologyPage> {
       AnimatedTreeView(
           treeController: treeController,
           nodeBuilder: (context, entry) {
+            var parent = entry.node.type == BaseModelsTypes.order
+                ? father
+                : entry.node.parent;
+            if (appState.isAuth &&
+                !widget.selectableMode &&
+                !entry.isExpanded &&
+                childrenMap[parent]!.indexOf(entry.node) ==
+                    childrenMap[parent]!.length - 1) {
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  TreeIndentation(
+                      entry: entry,
+                      child: Row(
+                        children: [
+                          getLeading(entry.node),
+                          Text(entry.node.name ?? "")
+                        ],
+                      )),
+                  IconButton.filled(
+                    onPressed: () {
+                      showDialog(
+                          context: context,
+                          builder: (context) {
+                            return const AddTopologyDialog();
+                          });
+                    },
+                    icon: const Icon(Icons.add),
+                    alignment: Alignment.topLeft,
+                  )
+                ],
+              );
+            }
             return TreeIndentation(
                 entry: entry,
                 child: Row(children: [
                   getLeading(entry.node),
                   widget.selectableMode
                       ? Container(
-                          color: selectableBaseModel != null && entry.node.id == selectableBaseModel!.id &&  entry.node.name == selectableBaseModel!.name
+                          color: selectableBaseModel != null &&
+                                  entry.node.id == selectableBaseModel!.id &&
+                                  entry.node.name == selectableBaseModel!.name
                               ? Theme.of(context).colorScheme.primaryContainer
                               : Colors.transparent,
                           child: GestureDetector(
