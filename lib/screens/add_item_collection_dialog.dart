@@ -4,7 +4,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:lab_gui_flutter/my_app_state.dart';
 import 'package:lab_gui_flutter/repository.dart';
 import 'package:intl/intl.dart';
-import 'package:lab_gui_flutter/screens/collectors.dart';
+import 'package:lab_gui_flutter/screens/collectors_page.dart';
 import 'package:lab_gui_flutter/screens/topology_page.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';

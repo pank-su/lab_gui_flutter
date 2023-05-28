@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:http/http.dart' as http;
 import 'package:lab_gui_flutter/models/base_model.dart';
@@ -405,5 +406,16 @@ Future<void> addCollector(
     'second_name': secondName
   };
   final response = await http.post(url, body: body, headers: {"Authorization": "Bearer $token"});
+  print(response.body);
+}
+
+Future<void> updateCollector(String lastName, String firstName, String secondName, String token, int id ) async{
+  var url = Uri.http(URL, 'collector', {"id":"eq.$id"});
+  final body = {
+    'last_name': lastName,
+    'first_name': firstName,
+    'second_name': secondName
+  };
+  final response = await http.patch(url, body: body, headers: {"Authorization": "Bearer $token"});
   print(response.body);
 }

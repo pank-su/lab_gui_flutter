@@ -1,3 +1,4 @@
+import 'package:context_menus/context_menus.dart';
 import 'package:flutter/material.dart';
 import 'package:lab_gui_flutter/models/collector.dart';
 import 'package:provider/provider.dart';
@@ -68,14 +69,14 @@ class _CollectorsPageState extends State<CollectorsPage> {
           future: getCollectors(),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              return SfDataGrid(
+              return ContextMenuOverlay(child: SfDataGrid(
                   allowFiltering: true,
                   allowSorting: true,
                   allowMultiColumnSorting: true,
                   controller: _dataGridController,
                   selectionMode: SelectionMode.multiple,
-                  source: CollectorDataSource(snapshot.data!),
-                  columns: columns);
+                  source: CollectorDataSource(snapshot.data!, context),
+                  columns: columns));
             } else {
               return const Center(child: CircularProgressIndicator());
             }

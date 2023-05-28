@@ -45,7 +45,7 @@ class CollectionDataSource extends DataGridSource {
               DataGridCell<bool?>(columnName: 'rna', value: item.rna),
               DataGridCell<String?>(columnName: 'comment', value: item.comment),
               DataGridCell<String?>(
-                  columnName: 'stringAgg', value: item.stringAgg),
+                  columnName: 'collectrors', value: item.collectors),
             ]))
         .toList();
   }
@@ -57,24 +57,29 @@ class CollectionDataSource extends DataGridSource {
 
   @override
   DataGridRowAdapter? buildRow(DataGridRow row) {
-    var appState = Provider.of<MyAppState>(context, listen: false); // Прошлушивание не нужно
+    
+    var appState = Provider.of<MyAppState>(context,
+        listen: false); // Проcлушивание не нужно
     return DataGridRowAdapter(
         cells: row.getCells().map<Widget>((dataGridCell) {
       return ContextMenuRegion(
           contextMenu: GenericContextMenu(buttonConfigs: [
-            ContextMenuButtonConfig("Изменить", onPressed: !appState.isAuth ? null : () {
-              var id = row.getCells().first.value as int;
-              appState.setSelectedCollectorsById(id);
-              appState.setTopologyByColId(id);
-              showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AddCollectionItemDialog(
-                      isUpdate: true,
-                      updatableId: id,
-                    );
-                  });
-            })
+            ContextMenuButtonConfig("Изменить",
+                onPressed: !appState.isAuth
+                    ? null
+                    : () {
+                        var id = row.getCells().first.value as int;
+                        appState.setSelectedCollectorsById(id);
+                        appState.setTopologyByColId(id);
+                        showDialog(
+                            context: context,
+                            builder: (context) {
+                              return AddCollectionItemDialog(
+                                isUpdate: true,
+                                updatableId: id,
+                              );
+                            });
+                      })
           ]),
           child: LayoutBuilder(
             builder: (context, constraints) {
@@ -87,9 +92,34 @@ class CollectionDataSource extends DataGridSource {
                   ),
                 );
               }
+              if (dataGridCell.columnName == 'id') {
+                if (appState.collection
+                        .firstWhere(
+                            (element) => element.id == dataGridCell.value)
+                        .hasFile ??
+                    false) {
+                  return Container(
+                      alignment: Alignment.center,
+                      padding: const EdgeInsets.all(16.0),
+                      child: Expanded(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Icon(Icons.file_present),
+                            Text(dataGridCell.value?.toString() ?? '')
+                          ],
+                        ),
+                      ));
+                } else {
+                  return Container(
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(dataGridCell.value?.toString() ?? ''),
+                  );
+                }
+              }
               return Container(
-                alignment: (dataGridCell.columnName == 'id' ||
-                        dataGridCell.columnName == 'latitude' ||
+                alignment: (dataGridCell.columnName == 'latitude' ||
                         dataGridCell.columnName == 'longitude')
                     ? Alignment.centerRight
                     : Alignment.centerLeft,

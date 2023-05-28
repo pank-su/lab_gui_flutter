@@ -19,7 +19,8 @@ class CollectionItem {
   String? date;
   bool? rna;
   String? comment;
-  String? stringAgg;
+  String? collectors;
+  bool? hasFile;
 
   CollectionItem({
     this.id,
@@ -42,7 +43,8 @@ class CollectionItem {
     this.date,
     this.rna,
     this.comment,
-    this.stringAgg,
+    this.collectors,
+    this.hasFile
   });
 
   factory CollectionItem.fromJson(Map<String, dynamic> json) {
@@ -67,7 +69,8 @@ class CollectionItem {
       date: json['Дата'] as String?,
       rna: json['rna'] as bool?,
       comment: json['Комментарий'] as String?,
-      stringAgg: json['string_agg'] as String?,
+      collectors: json['Коллекторы'] as String?,
+      hasFile: json["Файл"] as bool
     );
   }
 }

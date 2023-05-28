@@ -5,7 +5,10 @@ import 'package:provider/provider.dart';
 import '../my_app_state.dart';
 
 class AddCollector extends StatefulWidget {
-  const AddCollector({super.key});
+  final bool isUpdate;
+  final int? updatableId;
+
+  const AddCollector({super.key, required this.isUpdate, this.updatableId});
 
   @override
   State<AddCollector> createState() => _AddCollectorState();
@@ -20,7 +23,18 @@ class _AddCollectorState extends State<AddCollector> {
   var canAdd = false;
 
   Future<void> getInfo() async {
-    idController.text = (await getLastCollectorId()).toString();
+    if (!widget.isUpdate) {
+      idController.text = (await getLastCollectorId()).toString();
+      return;
+    }
+    idController.text = widget.updatableId?.toString() ?? " ";
+    var collector = await getCollectorById(widget.updatableId ?? 0);
+    lastNameController.text = collector.lastName ?? "";
+    firstNameController.text = collector.firstName ?? "";
+    secondNameController.text = collector.secondName ?? "";
+    setState(() {
+      canAdd = true;
+    });
   }
 
   @override
@@ -33,20 +47,20 @@ class _AddCollectorState extends State<AddCollector> {
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
     return AlertDialog(
-      title: Text("Добавление нового коллектора"),
-      icon: Icon(Icons.add),
+      title: const Text("Добавление нового коллектора"),
+      icon: const Icon(Icons.add),
       content: Column(mainAxisSize: MainAxisSize.min, children: [
         TextField(
           decoration:
-              InputDecoration(border: OutlineInputBorder(), label: Text("ID")),
+              const InputDecoration(border: OutlineInputBorder(), label: Text("ID")),
           enabled: false,
           controller: idController,
         ),
-        SizedBox(
+        const SizedBox(
           height: 20,
         ),
         TextField(
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
               border: OutlineInputBorder(), label: Text("Фамилия")),
           controller: lastNameController,
           onChanged: (value) {
@@ -55,19 +69,19 @@ class _AddCollectorState extends State<AddCollector> {
             });
           },
         ),
-        SizedBox(
+        const SizedBox(
           height: 20,
         ),
         TextField(
           decoration:
-              InputDecoration(border: OutlineInputBorder(), label: Text("Имя")),
+              const InputDecoration(border: OutlineInputBorder(), label: Text("Имя")),
           controller: firstNameController,
         ),
-        SizedBox(
+        const SizedBox(
           height: 20,
         ),
         TextField(
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
               border: OutlineInputBorder(), label: Text("Отчетство")),
           controller: secondNameController,
         )
@@ -75,15 +89,24 @@ class _AddCollectorState extends State<AddCollector> {
       actions: [
         FilledButton(
             onPressed: canAdd
-                ? () async {
-                    addCollector(
+                ? () async {if (!widget.isUpdate) {
+                  addCollector(
                         lastNameController.text,
                         firstNameController.text,
                         secondNameController.text,
                         appState.token!);
+                } else{
+                  updateCollector(
+                        lastNameController.text,
+                        firstNameController.text,
+                        secondNameController.text,
+                        appState.token!, widget.updatableId ?? -1);
+                }
+                Navigator.pop(context);
                   }
+                  
                 : null,
-            child: Text("Добавить"))
+            child: Text(widget.isUpdate ? "Изменить" : "Добавить"))
       ],
     );
   }
