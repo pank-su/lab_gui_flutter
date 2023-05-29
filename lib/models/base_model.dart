@@ -38,4 +38,15 @@ class BaseModel {
     
     return topology.reversed.toList();
   }
+
+  @override
+  String toString() {
+     return "$id $name";
+  }
+
+  @override
+  // TODO: implement hashCode
+  int get hashCode => super.hashCode;
+
+  bool operator ==(dynamic other) => other != null && other is BaseModel && other.type == type && other.id == id && other.name == name;
 }

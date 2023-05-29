@@ -133,7 +133,7 @@ class _TopologyPageState extends State<TopologyPage> {
                       showDialog(
                           context: context,
                           builder: (context) {
-                            return const AddTopologyDialog();
+                            return AddTopologyDialog(selectedBaseModel: parent,);
                           });
                     },
                     icon: const Icon(Icons.add),
