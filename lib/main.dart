@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:lab_gui_flutter/my_app_state.dart';
 import 'package:lab_gui_flutter/screens/add_collector_dialog.dart';
+import 'package:lab_gui_flutter/screens/add_topology_dialog.dart';
 import 'package:lab_gui_flutter/screens/auth.dart';
 import 'package:lab_gui_flutter/screens/collection_page.dart';
 import 'package:lab_gui_flutter/screens/collectors_page.dart';
@@ -83,6 +84,7 @@ class _MainPageState extends State<MainPage> {
         break;
       case 1:
         page = const TopologyPage(selectableMode: false,);
+        dialog = const AddTopologyDialog();
         break;
       case 2:
         page = const CollectorsPage(selectableMode: false);

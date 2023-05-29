@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:lab_gui_flutter/models/base_model.dart';
 import 'package:lab_gui_flutter/repository.dart';
+import 'package:provider/provider.dart';
 
+import '../my_app_state.dart';
 
 // Смещение так как отправляется отец
 const List<String> topology = <String>['Отряд', 'Семейство', 'Род', 'Вид'];
+const Map<String, BaseModelsTypes> topologyNameToBaseModel = {
+  "Отряд": BaseModelsTypes.order,
+  "Семейство": BaseModelsTypes.family,
+  "Род": BaseModelsTypes.genus,
+  "Вид": BaseModelsTypes.kind
+};
+
 const Map<BaseModelsTypes, String> baseModelToTopologyName = {
   BaseModelsTypes.order: "Семейство",
   BaseModelsTypes.family: "Род",
@@ -35,17 +44,18 @@ class _AddTopologyDialogState extends State<AddTopologyDialog> {
 
   Future<void> getInfo() async {
     selectedTopology =
-        baseModelToTopologyName[widget.selectedBaseModel?.type] ?? topology.first;
-    
-    if (widget.selectedBaseModel?.type == BaseModelsTypes.order){
+        baseModelToTopologyName[widget.selectedBaseModel?.type] ??
+            topology.first;
+
+    if (widget.selectedBaseModel?.type == BaseModelsTypes.order) {
       order = widget.selectedBaseModel;
     }
-    if (widget.selectedBaseModel?.type == BaseModelsTypes.family){
+    if (widget.selectedBaseModel?.type == BaseModelsTypes.family) {
       family = widget.selectedBaseModel;
       order = family?.parent;
       return;
     }
-    if (widget.selectedBaseModel?.type == BaseModelsTypes.genus){
+    if (widget.selectedBaseModel?.type == BaseModelsTypes.genus) {
       genus = widget.selectedBaseModel;
       family = genus?.parent;
       order = family?.parent;
@@ -83,6 +93,7 @@ class _AddTopologyDialogState extends State<AddTopologyDialog> {
 
   @override
   Widget build(BuildContext context) {
+    var appState = Provider.of<MyAppState>(context, listen: false);
     return AlertDialog(
       title: Text("Добавление ${selectedTopology.toLowerCase()}а"),
       icon: const Icon(Icons.add),
@@ -107,7 +118,18 @@ class _AddTopologyDialogState extends State<AddTopologyDialog> {
           controller: nameController,
         ),
       ]),
-      actions: [FilledButton(onPressed: () {}, child: const Text("Добавить"))],
+      actions: [
+        FilledButton(
+            onPressed: () {
+              var parentId = -1;
+              parentId = genus?.id ?? -1;
+              parentId = family?.id ?? -1;
+              parentId = order?.id ?? -1;
+              addBaseModel(topologyNameToBaseModel[selectedTopology]!, parentId,
+                  nameController.text, appState.token ?? "");
+            },
+            child: const Text("Добавить"))
+      ],
     );
   }
 

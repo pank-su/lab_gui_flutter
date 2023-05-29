@@ -404,17 +404,51 @@ Future<void> addCollector(
     'first_name': firstName,
     'second_name': secondName
   };
-  final response = await http.post(url, body: body, headers: {"Authorization": "Bearer $token"});
+  final response = await http
+      .post(url, body: body, headers: {"Authorization": "Bearer $token"});
   print(response.body);
 }
 
-Future<void> updateCollector(String lastName, String firstName, String secondName, String token, int id ) async{
-  var url = Uri.http(URL, 'collector', {"id":"eq.$id"});
+Future<void> updateCollector(String lastName, String firstName,
+    String secondName, String token, int id) async {
+  var url = Uri.http(URL, 'collector', {"id": "eq.$id"});
   final body = {
     'last_name': lastName,
     'first_name': firstName,
     'second_name': secondName
   };
-  final response = await http.patch(url, body: body, headers: {"Authorization": "Bearer $token"});
+  final response = await http
+      .patch(url, body: body, headers: {"Authorization": "Bearer $token"});
+  print(response.body);
+}
+
+final topology = [
+  BaseModelsTypes.order,
+  BaseModelsTypes.family,
+  BaseModelsTypes.genus,
+  BaseModelsTypes.kind
+];
+
+Future<void> addBaseModel(
+  BaseModelsTypes type,
+  int parentId,
+  String name,
+  String token,
+) async {
+  var url = Uri.http(URL, type.name);
+  var body;
+  try{
+    var parent = topology[topology.indexOf(type) - 1];
+    body = {
+      '${parent.name}_id': parentId.toString(),
+      "name": name,
+    };
+  } on RangeError{
+     body = {
+      "name": name,
+    };
+  }
+  final response = await http
+      .post(url, body: body, headers: {"Authorization": "Bearer $token"});
   print(response.body);
 }
