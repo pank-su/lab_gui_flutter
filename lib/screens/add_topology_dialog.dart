@@ -140,7 +140,7 @@ class _AddTopologyDialogState extends State<AddTopologyDialog> {
     var children = [
       Column(
         children: [
-          Text("Отряд"),
+          const Text("Отряд"),
           DropdownButton<BaseModel>(
               value: order ?? orders[0],
               items: orders
@@ -162,7 +162,7 @@ class _AddTopologyDialogState extends State<AddTopologyDialog> {
     if (topology.indexOf(selectedTopology) >= 2) {
       children.add(Column(
         children: [
-          Text("Семейство"),
+          const Text("Семейство"),
           DropdownButton<BaseModel>(
               value: family!,
               items: families
@@ -184,7 +184,7 @@ class _AddTopologyDialogState extends State<AddTopologyDialog> {
     if (topology.indexOf(selectedTopology) == 3) {
       children.add(Column(
         children: [
-          Text("Род"),
+          const Text("Род"),
           DropdownButton<BaseModel>(
               value: genus!,
               items: genuses

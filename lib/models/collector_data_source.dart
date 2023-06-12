@@ -20,9 +20,9 @@ class CollectorDataSource extends DataGridSource {
             DataGridCell<int>(columnName: 'id', value: collector.id),
             DataGridCell<String>(
                 columnName: 'lastName', value: collector.lastName),
-            DataGridCell<dynamic>(
+            DataGridCell<String>(
                 columnName: 'firstName', value: collector.firstName),
-            DataGridCell<dynamic>(
+            DataGridCell<String>(
                 columnName: 'secondName', value: collector.secondName),
           ],
         );

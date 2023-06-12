@@ -30,7 +30,7 @@ class _CollectorsPageState extends State<CollectorsPage> {
       ),
     ),
     GridColumn(
-      columnName: 'last_name',
+      columnName: 'lastName',
       width: 200,
       label: Container(
         padding: const EdgeInsets.all(16.0),
@@ -39,7 +39,7 @@ class _CollectorsPageState extends State<CollectorsPage> {
       ),
     ),
     GridColumn(
-      columnName: 'first_name',
+      columnName: 'firstName',
       width: 200,
       label: Container(
         padding: const EdgeInsets.all(16.0),
@@ -48,7 +48,7 @@ class _CollectorsPageState extends State<CollectorsPage> {
       ),
     ),
     GridColumn(
-      columnName: 'second_name',
+      columnName: 'secondName',
       width: 200,
       label: Container(
         padding: const EdgeInsets.all(16.0),
@@ -69,14 +69,15 @@ class _CollectorsPageState extends State<CollectorsPage> {
           future: getCollectors(),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              return ContextMenuOverlay(child: SfDataGrid(
-                  allowFiltering: true,
-                  allowSorting: true,
-                  allowMultiColumnSorting: true,
-                  controller: _dataGridController,
-                  selectionMode: SelectionMode.multiple,
-                  source: CollectorDataSource(snapshot.data!, context),
-                  columns: columns));
+              return ContextMenuOverlay(
+                  child: SfDataGrid(
+                      allowFiltering: true,
+                      allowSorting: true,
+                      allowMultiColumnSorting: true,
+                      controller: _dataGridController,
+                      selectionMode: SelectionMode.multiple,
+                      source: CollectorDataSource(snapshot.data!, context),
+                      columns: columns));
             } else {
               return const Center(child: CircularProgressIndicator());
             }

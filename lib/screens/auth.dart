@@ -162,12 +162,12 @@ class _ProfileInfoComponentState extends State<ProfileInfoComponent> {
   var isLoading = true;
 
   Future<void> getUserInfo(String token) async {
-    try{
+    try {
       user = await getUserInfoByToken(token);
-    }on Exception{
+    } on Exception {
       widget.appState.logout();
     }
-    
+
     setState(() {
       isLoading = false;
     });

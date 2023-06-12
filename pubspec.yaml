@@ -21,6 +21,7 @@ dependencies:
   latlong2: ^0.8.1
   osm_nominatim: ^2.0.1
   context_menus: ^1.0.2
+  responsive_grid: ^2.3.0
   flutter_localizations:
     sdk: flutter
 

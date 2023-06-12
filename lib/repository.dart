@@ -436,7 +436,7 @@ Future<void> addBaseModel(
   String token,
 ) async {
   var url = Uri.http(URL, type.name);
-  var body;
+  Map<String, String> body;
   try{
     var parent = topology[topology.indexOf(type) - 1];
     body = {

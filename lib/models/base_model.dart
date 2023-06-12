@@ -44,9 +44,7 @@ class BaseModel {
      return "$id $name";
   }
 
-  @override
-  // TODO: implement hashCode
-  int get hashCode => super.hashCode;
 
+  @override
   bool operator ==(dynamic other) => other != null && other is BaseModel && other.type == type && other.id == id && other.name == name;
 }
