@@ -9,10 +9,11 @@ import 'collection_item.dart';
 
 /// Источник данных для таблицы
 class CollectionDataSource extends DataGridSource {
-  final BuildContext context;
+  BuildContext context;
+  final List<CollectionItem> collectionItems;
 
-  CollectionDataSource(
-      {required List<CollectionItem> collectionItems, required this.context}) {
+  void updateCollectionItems(List<CollectionItem> collectionItems) {
+    context = context;
     _collectionItems = collectionItems
         .map<DataGridRow>((item) => DataGridRow(cells: [
               DataGridCell<int?>(columnName: 'id', value: item.id),
@@ -50,6 +51,10 @@ class CollectionDataSource extends DataGridSource {
         .toList();
   }
 
+  CollectionDataSource({required this.collectionItems, required this.context}) {
+    updateCollectionItems(collectionItems);
+  }
+
   List<DataGridRow> _collectionItems = [];
 
   @override
@@ -57,7 +62,6 @@ class CollectionDataSource extends DataGridSource {
 
   @override
   DataGridRowAdapter? buildRow(DataGridRow row) {
-    
     var appState = Provider.of<MyAppState>(context,
         listen: false); // Проcлушивание не нужно
     return DataGridRowAdapter(

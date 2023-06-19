@@ -6,6 +6,7 @@ import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import '../models/collection_data_source.dart';
 import '../my_app_state.dart';
 import '../repository.dart';
+import 'loading_indicator.dart';
 
 class CollectionPage extends StatefulWidget {
   const CollectionPage({super.key});
@@ -15,12 +16,6 @@ class CollectionPage extends StatefulWidget {
 }
 
 class _CollectionPageState extends State<CollectionPage> {
-
-  Future<void> _updateCollection(MyAppState appState) async {
-    appState.collection = await getCollection();
-    appState.finishRestart();
-  }
-
   late Map<String, double> columnWidthsCollection = {
     'id': double.nan,
     'catalogueNumber': double.nan,
@@ -44,8 +39,6 @@ class _CollectionPageState extends State<CollectionPage> {
     'comment': double.nan,
     'stringAgg': double.nan,
   };
-
-  final DataGridController _controller = DataGridController();
 
   @override
   void initState() {
@@ -248,44 +241,37 @@ class _CollectionPageState extends State<CollectionPage> {
     ];
 
     var appState = context.watch<MyAppState>();
+    appState.collectionDataSource.context = context;
+
     if (appState.isRestart || appState.collection.isEmpty) {
-      _updateCollection(appState);
-      return const Center(
-          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        CircularProgressIndicator(),
-        SizedBox(
-          height: 10,
-        ),
-        Text("Подождите, происходит загрузка данных...")
-      ]));
+      return const LoadingIndicator();
     }
 
-    return  ContextMenuOverlay(
-            child: SfDataGrid(
-          controller: _controller,
-          //allowFiltering: true,
-          frozenColumnsCount: 1,
-          columnWidthMode: ColumnWidthMode.auto,
-          columnWidthCalculationRange: ColumnWidthCalculationRange.visibleRows,
-          selectionMode: SelectionMode.multiple,
-          allowColumnsResizing: true,
-          allowFiltering: true,
-          allowSorting: true,
-          allowMultiColumnSorting: true,
-          columnResizeMode: ColumnResizeMode.onResizeEnd,
-          isScrollbarAlwaysShown: true,
-          columns: columns,
-          onColumnResizeUpdate: (ColumnResizeUpdateDetails details) {
-            if (details.width < 30) {
-              return false;
-            }
-            setState(() {
-              columnWidthsCollection[details.column.columnName] = details.width;
-            });
-            return true;
-          },
-          source: CollectionDataSource(
-              collectionItems: appState.collection, context: context),
-        ));
+    return ContextMenuOverlay(
+        child: SfDataGrid(
+      controller: appState.collectionController,
+      //allowFiltering: true,
+      frozenColumnsCount: 1,
+      columnWidthMode: ColumnWidthMode.auto,
+      columnWidthCalculationRange: ColumnWidthCalculationRange.visibleRows,
+      selectionMode: SelectionMode.multiple,
+      allowColumnsResizing: true,
+      allowFiltering: true,
+      allowSorting: true,
+      allowMultiColumnSorting: true,
+      columnResizeMode: ColumnResizeMode.onResizeEnd,
+      isScrollbarAlwaysShown: true,
+      columns: columns,
+      onColumnResizeUpdate: (ColumnResizeUpdateDetails details) {
+        if (details.width < 30) {
+          return false;
+        }
+        setState(() {
+          columnWidthsCollection[details.column.columnName] = details.width;
+        });
+        return true;
+      },
+      source: appState.collectionDataSource,
+    ));
   }
 }

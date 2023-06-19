@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_session_manager/flutter_session_manager.dart';
+import 'package:lab_gui_flutter/models/collection_data_source.dart';
+import 'package:lab_gui_flutter/models/collector_data_source.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import 'models/base_model.dart';
@@ -13,11 +15,24 @@ class MyAppState extends ChangeNotifier {
   var isAuth = false;
   String? token;
 
+  final DataGridController collectionController = DataGridController();
+  final DataGridController collectorController = DataGridController();
+  List<CollectionItem> collection = List.empty(growable: true);
+  late List<Collector> collectors = List.empty(growable: true);
+  late CollectionDataSource collectionDataSource;
+
   // Добавление изменение
   BaseModel? selectedBaseModel;
   List<Collector> selectedCollectors = List.empty(growable: true);
 
-  Future<void> resetSelected() async{
+  void start({required BuildContext context}) {
+    collectionDataSource =
+        CollectionDataSource(collectionItems: collection, context: context);
+    autoUpdate();
+    checkToken();
+  }
+
+  Future<void> resetSelected() async {
     selectedBaseModel = null;
     selectedCollectors = List.empty(growable: true);
   }
@@ -27,12 +42,12 @@ class MyAppState extends ChangeNotifier {
     selectedCollectors = await getCollectorsByColItemId(id);
     notifyListeners();
   }
-  
+
   /// Получение топологии по [id] записи коллекции
   Future<void> setTopologyByColId(int id) async {
     var colItem = await getCollectionItemById(id);
-    selectedBaseModel = await getBaseModelByNames(
-        colItem.order ?? "", colItem.family ?? "", colItem.genus ?? "", colItem.species ?? "");
+    selectedBaseModel = await getBaseModelByNames(colItem.order ?? "",
+        colItem.family ?? "", colItem.genus ?? "", colItem.species ?? "");
     notifyListeners();
   }
 
@@ -42,7 +57,7 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Передача выбранных строк ([collectorsRows]) из таблицы Коллекторы 
+  /// Передача выбранных строк ([collectorsRows]) из таблицы Коллекторы
   Future<void> setSelectedCollectors(List<DataGridRow> collectorsRows) async {
     var collectors = await getCollectors();
     selectedCollectors.clear();
@@ -77,7 +92,7 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Выход пользователя 
+  /// Выход пользователя
   // TODO добавить на сервер чёрный список токенов
   Future<void> logout() async {
     token = null;
@@ -86,26 +101,28 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Для обновление всех таблиц
+  // Для обновления всех таблиц
   var isRestart = true;
 
-  Future<void> restartNow() async{
+  Future<void> restartNow() async {
     isRestart = true;
     notifyListeners();
+    collection = await getCollection();
+    collectionDataSource.updateCollectionItems(collection);
+    collectionDataSource.notifyListeners();
+    collectors = await getCollectors();
+    finishRestart();
   }
 
-  Future<void> finishRestart() async{
+  Future<void> finishRestart() async {
     isRestart = false;
     notifyListeners();
   }
 
-  List<CollectionItem> collection = List.empty();
-
-  Future<void> autoUpdate() async{
-    while(true){
-      await Future.delayed(const Duration(minutes: 10));
+  Future<void> autoUpdate() async {
+    while (true) {
       restartNow();
+      await Future.delayed(const Duration(minutes: 1));
     }
   }
-  
 }

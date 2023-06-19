@@ -17,13 +17,11 @@ import 'screens/add_item_collection_dialog.dart';
 import 'screens/topology_page.dart';
 
 void main() {
-  if (kIsWeb){
+  if (kIsWeb) {
     webSet();
   }
   runApp(const MainApp());
-
 }
-
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
@@ -31,8 +29,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appState = MyAppState();
-    appState.autoUpdate();
-    appState.checkToken();
+    appState.start(context: context);
     return ChangeNotifierProvider(
       create: (context) => appState,
       child: MaterialApp(
@@ -66,7 +63,7 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
-    
+
     var theme = Theme.of(context);
     var surfaceContainer = ElevationOverlay.applySurfaceTint(
         theme.colorScheme.surface,
@@ -75,15 +72,18 @@ class _MainPageState extends State<MainPage> {
 
     Widget page;
     Widget dialog = const Dialog();
-    
 
     switch (selectedIndex) {
       case 0:
         page = const CollectionPage();
-        dialog = const AddCollectionItemDialog(isUpdate: false,);
+        dialog = const AddCollectionItemDialog(
+          isUpdate: false,
+        );
         break;
       case 1:
-        page = const TopologyPage(selectableMode: false,);
+        page = const TopologyPage(
+          selectableMode: false,
+        );
         dialog = const AddTopologyDialog();
         break;
       case 2:
