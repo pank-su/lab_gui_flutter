@@ -10,6 +10,14 @@ import 'models/collector.dart';
 import 'models/jwt.dart';
 import 'repository.dart';
 
+sealed class TableState {}
+
+class Error extends TableState {}
+
+class Loading extends TableState {}
+
+class Loaded extends TableState {}
+
 class MyAppState extends ChangeNotifier {
   // Авторизация
   var isAuth = false;
@@ -103,23 +111,33 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  TableState state = Loading();
+
   // Для обновления всех таблиц
-  var isRestart = true;
+  bool get isRestart => state == Loading();
 
   Future<void> restartNow() async {
-    isRestart = true;
+    state = Loading();
     notifyListeners();
-    collection = await getCollection();
+    await Future.delayed(const Duration(seconds: 1));
+    try {
+      collection = await getCollection();
+      collectors = await getCollectors();
+    } on Exception catch (_) {
+      state = Error();
+      notifyListeners();
+      return;
+    }
+
+    collectorDataSource.collectors = collectors;
     collectionDataSource.updateCollectionItems(collection);
     collectionDataSource.notifyListeners();
-    collectors = await getCollectors();
-    collectorDataSource.collectors = collectors;
     collectorDataSource.notifyListeners();
     finishRestart();
   }
 
   Future<void> finishRestart() async {
-    isRestart = false;
+    state = Loaded();
     notifyListeners();
   }
 

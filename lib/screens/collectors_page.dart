@@ -5,9 +5,7 @@ import 'package:lab_gui_flutter/screens/loading_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
-import '../models/collector_data_source.dart';
 import '../my_app_state.dart';
-import '../repository.dart';
 
 class CollectorsPage extends StatefulWidget {
   const CollectorsPage({super.key, required this.selectableMode});
@@ -71,14 +69,25 @@ class _CollectorsPageState extends State<CollectorsPage> {
         if (appState.isRestart || appState.collectors.isEmpty) {
           return const LoadingIndicator();
         }
-        return SfDataGrid(
-            allowFiltering: true,
-            allowSorting: true,
-            allowMultiColumnSorting: true,
-            controller: appState.collectorController,
-            selectionMode: SelectionMode.multiple,
-            source: appState.collectorDataSource,
-            columns: columns);
+        if (widget.selectableMode) {
+          return SfDataGrid(
+              allowFiltering: true,
+              allowSorting: true,
+              allowMultiColumnSorting: true,
+              controller: appState.collectorController,
+              selectionMode: SelectionMode.multiple,
+              source: appState.collectorDataSource,
+              columns: columns);
+        }
+        return ContextMenuOverlay(
+            child: SfDataGrid(
+                allowFiltering: true,
+                allowSorting: true,
+                allowMultiColumnSorting: true,
+                controller: appState.collectorController,
+                selectionMode: SelectionMode.multiple,
+                source: appState.collectorDataSource,
+                columns: columns));
       }),
       widget.selectableMode
           ? Container(

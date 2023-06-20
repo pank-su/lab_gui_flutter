@@ -1,11 +1,9 @@
 import 'package:context_menus/context_menus.dart';
 import 'package:flutter/material.dart';
+import 'package:lab_gui_flutter/screens/error_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
-
-import '../models/collection_data_source.dart';
 import '../my_app_state.dart';
-import '../repository.dart';
 import 'loading_indicator.dart';
 
 class CollectionPage extends StatefulWidget {
@@ -243,35 +241,42 @@ class _CollectionPageState extends State<CollectionPage> {
     var appState = context.watch<MyAppState>();
     appState.collectionDataSource.context = context;
 
-    if (appState.isRestart || appState.collection.isEmpty) {
-      return const LoadingIndicator();
+    switch (appState.state) {
+      case Error():
+        return ErrorIndicator(
+          buttonFNC: () {
+            appState.restartNow();
+          },
+        );
+      case Loading():
+        return const LoadingIndicator();
+      case Loaded():
+        return ContextMenuOverlay(
+            child: SfDataGrid(
+          controller: appState.collectionController,
+          //allowFiltering: true,
+          frozenColumnsCount: 1,
+          columnWidthMode: ColumnWidthMode.auto,
+          columnWidthCalculationRange: ColumnWidthCalculationRange.visibleRows,
+          selectionMode: SelectionMode.multiple,
+          allowColumnsResizing: true,
+          allowFiltering: true,
+          allowSorting: true,
+          allowMultiColumnSorting: true,
+          columnResizeMode: ColumnResizeMode.onResizeEnd,
+          isScrollbarAlwaysShown: true,
+          columns: columns,
+          onColumnResizeUpdate: (ColumnResizeUpdateDetails details) {
+            if (details.width < 30) {
+              return false;
+            }
+            setState(() {
+              columnWidthsCollection[details.column.columnName] = details.width;
+            });
+            return true;
+          },
+          source: appState.collectionDataSource,
+        ));
     }
-
-    return ContextMenuOverlay(
-        child: SfDataGrid(
-      controller: appState.collectionController,
-      //allowFiltering: true,
-      frozenColumnsCount: 1,
-      columnWidthMode: ColumnWidthMode.auto,
-      columnWidthCalculationRange: ColumnWidthCalculationRange.visibleRows,
-      selectionMode: SelectionMode.multiple,
-      allowColumnsResizing: true,
-      allowFiltering: true,
-      allowSorting: true,
-      allowMultiColumnSorting: true,
-      columnResizeMode: ColumnResizeMode.onResizeEnd,
-      isScrollbarAlwaysShown: true,
-      columns: columns,
-      onColumnResizeUpdate: (ColumnResizeUpdateDetails details) {
-        if (details.width < 30) {
-          return false;
-        }
-        setState(() {
-          columnWidthsCollection[details.column.columnName] = details.width;
-        });
-        return true;
-      },
-      source: appState.collectionDataSource,
-    ));
   }
 }

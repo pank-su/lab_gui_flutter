@@ -37,6 +37,7 @@ Future<bool> testRequest(String jwt) async {
 Future<List<CollectionItem>> getCollection() async {
   var url = Uri.http(URL, 'basic_view');
   final response = await http.get(url);
+
   if (response.statusCode == 200) {
     Iterable l = json.decode(response.body);
     List<CollectionItem> collection = List<CollectionItem>.from(
@@ -437,14 +438,14 @@ Future<void> addBaseModel(
 ) async {
   var url = Uri.http(URL, type.name);
   Map<String, String> body;
-  try{
+  try {
     var parent = topology[topology.indexOf(type) - 1];
     body = {
       '${parent.name}_id': parentId.toString(),
       "name": name,
     };
-  } on RangeError{
-     body = {
+  } on RangeError {
+    body = {
       "name": name,
     };
   }
