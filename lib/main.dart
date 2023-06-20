@@ -6,7 +6,7 @@ import 'package:lab_gui_flutter/screens/add_topology_dialog.dart';
 import 'package:lab_gui_flutter/screens/auth.dart';
 import 'package:lab_gui_flutter/screens/collection_page.dart';
 import 'package:lab_gui_flutter/screens/collectors_page.dart';
-import 'package:lab_gui_flutter/web_settings.dart';
+//import 'package:lab_gui_flutter/web_settings.dart';
 import 'package:provider/provider.dart';
 import 'package:side_sheet_material3/side_sheet_material3.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -18,7 +18,7 @@ import 'screens/topology_page.dart';
 
 void main() {
   if (kIsWeb) {
-    webSet();
+    //webSet();
   }
   runApp(const MainApp());
 }
@@ -162,9 +162,11 @@ class _MainPageState extends State<MainPage> {
                             label: Text("Коллекторы"))
                       ],
                     ))),
-            const VerticalDivider(thickness: 1, width: 1),
             Expanded(
-              child: Container(child: page),
+              child: Container(
+                color: surfaceContainer,
+                child: page,
+              ),
             )
           ],
         ));

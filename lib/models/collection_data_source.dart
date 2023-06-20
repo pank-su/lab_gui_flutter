@@ -46,7 +46,7 @@ class CollectionDataSource extends DataGridSource {
               DataGridCell<bool?>(columnName: 'rna', value: item.rna),
               DataGridCell<String?>(columnName: 'comment', value: item.comment),
               DataGridCell<String?>(
-                  columnName: 'collectrors', value: item.collectors),
+                  columnName: 'collectors', value: item.collectors),
             ]))
         .toList();
   }

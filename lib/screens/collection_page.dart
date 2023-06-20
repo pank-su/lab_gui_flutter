@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import '../my_app_state.dart';
 import 'loading_indicator.dart';
+import 'package:syncfusion_flutter_core/theme.dart';
 
 class CollectionPage extends StatefulWidget {
   const CollectionPage({super.key});
@@ -228,7 +229,7 @@ class _CollectionPageState extends State<CollectionPage> {
         ),
       ),
       GridColumn(
-        columnName: 'stringAgg',
+        columnName: 'collectors',
         width: columnWidthsCollection['stringAgg']!,
         label: Container(
           padding: const EdgeInsets.all(16.0),
@@ -239,6 +240,7 @@ class _CollectionPageState extends State<CollectionPage> {
     ];
 
     var appState = context.watch<MyAppState>();
+    var theme = Theme.of(context);
     appState.collectionDataSource.context = context;
 
     switch (appState.state) {
@@ -250,33 +252,45 @@ class _CollectionPageState extends State<CollectionPage> {
         );
       case Loading():
         return const LoadingIndicator();
-      case Loaded():
-        return ContextMenuOverlay(
-            child: SfDataGrid(
-          controller: appState.collectionController,
-          //allowFiltering: true,
-          frozenColumnsCount: 1,
-          columnWidthMode: ColumnWidthMode.auto,
-          columnWidthCalculationRange: ColumnWidthCalculationRange.visibleRows,
-          selectionMode: SelectionMode.multiple,
-          allowColumnsResizing: true,
-          allowFiltering: true,
-          allowSorting: true,
-          allowMultiColumnSorting: true,
-          columnResizeMode: ColumnResizeMode.onResizeEnd,
-          isScrollbarAlwaysShown: true,
-          columns: columns,
-          onColumnResizeUpdate: (ColumnResizeUpdateDetails details) {
-            if (details.width < 30) {
-              return false;
-            }
-            setState(() {
-              columnWidthsCollection[details.column.columnName] = details.width;
-            });
-            return true;
-          },
-          source: appState.collectionDataSource,
-        ));
+      default:
+        break;
     }
+    // Здесь необходим LayoutBuilder,
+    //  потому что иначе flutter не видит обновлений и не хочет обновлять таблицу
+    return LayoutBuilder(builder: (context, constraints) {
+      return ContextMenuOverlay(
+          child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: SfDataGridTheme(
+                  data: SfDataGridThemeData(
+                      headerColor: theme.colorScheme.primaryContainer,
+                      selectionColor: theme.colorScheme.secondaryContainer),
+                  child: SfDataGrid(
+                    controller: appState.collectionController,
+                    frozenColumnsCount: 1,
+                    columnWidthMode: ColumnWidthMode.auto,
+                    columnWidthCalculationRange:
+                        ColumnWidthCalculationRange.visibleRows,
+                    selectionMode: SelectionMode.multiple,
+                    allowColumnsResizing: true,
+                    allowFiltering: true,
+                    allowSorting: true,
+                    allowMultiColumnSorting: true,
+                    columnResizeMode: ColumnResizeMode.onResizeEnd,
+                    isScrollbarAlwaysShown: true,
+                    columns: columns,
+                    onColumnResizeUpdate: (ColumnResizeUpdateDetails details) {
+                      if (details.width < 30) {
+                        return false;
+                      }
+                      setState(() {
+                        columnWidthsCollection[details.column.columnName] =
+                            details.width;
+                      });
+                      return true;
+                    },
+                    source: appState.collectionDataSource,
+                  ))));
+    });
   }
 }
