@@ -8,8 +8,8 @@ import '../my_app_state.dart';
 import 'collector.dart';
 
 class CollectorDataSource extends DataGridSource {
-  final BuildContext context;
-  final List<Collector> collectors;
+  BuildContext context;
+  List<Collector> collectors;
 
   CollectorDataSource(this.collectors, this.context);
 

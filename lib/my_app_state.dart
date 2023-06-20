@@ -18,8 +18,9 @@ class MyAppState extends ChangeNotifier {
   final DataGridController collectionController = DataGridController();
   final DataGridController collectorController = DataGridController();
   List<CollectionItem> collection = List.empty(growable: true);
-  late List<Collector> collectors = List.empty(growable: true);
+  List<Collector> collectors = List.empty(growable: true);
   late CollectionDataSource collectionDataSource;
+  late CollectorDataSource collectorDataSource;
 
   // Добавление изменение
   BaseModel? selectedBaseModel;
@@ -28,6 +29,7 @@ class MyAppState extends ChangeNotifier {
   void start({required BuildContext context}) {
     collectionDataSource =
         CollectionDataSource(collectionItems: collection, context: context);
+    collectorDataSource = CollectorDataSource(collectors, context);
     autoUpdate();
     checkToken();
   }
@@ -111,6 +113,8 @@ class MyAppState extends ChangeNotifier {
     collectionDataSource.updateCollectionItems(collection);
     collectionDataSource.notifyListeners();
     collectors = await getCollectors();
+    collectorDataSource.collectors = collectors;
+    collectorDataSource.notifyListeners();
     finishRestart();
   }
 

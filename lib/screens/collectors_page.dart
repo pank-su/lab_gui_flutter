@@ -1,6 +1,7 @@
 import 'package:context_menus/context_menus.dart';
 import 'package:flutter/material.dart';
 import 'package:lab_gui_flutter/models/collector.dart';
+import 'package:lab_gui_flutter/screens/loading_indicator.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
@@ -63,25 +64,22 @@ class _CollectorsPageState extends State<CollectorsPage> {
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
+    appState.collectorDataSource.context = context;
 
     return Stack(children: [
-      FutureBuilder(
-          future: getCollectors(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return ContextMenuOverlay(
-                  child: SfDataGrid(
-                      allowFiltering: true,
-                      allowSorting: true,
-                      allowMultiColumnSorting: true,
-                      controller: _dataGridController,
-                      selectionMode: SelectionMode.multiple,
-                      source: CollectorDataSource(snapshot.data!, context),
-                      columns: columns));
-            } else {
-              return const Center(child: CircularProgressIndicator());
-            }
-          }),
+      LayoutBuilder(builder: (context, constraints) {
+        if (appState.isRestart || appState.collectors.isEmpty) {
+          return const LoadingIndicator();
+        }
+        return SfDataGrid(
+            allowFiltering: true,
+            allowSorting: true,
+            allowMultiColumnSorting: true,
+            controller: appState.collectorController,
+            selectionMode: SelectionMode.multiple,
+            source: appState.collectorDataSource,
+            columns: columns);
+      }),
       widget.selectableMode
           ? Container(
               margin: const EdgeInsets.all(70),
@@ -91,7 +89,7 @@ class _CollectorsPageState extends State<CollectorsPage> {
                       onPressed: true
                           ? () {
                               appState.setSelectedCollectors(
-                                  _dataGridController.selectedRows);
+                                  appState.collectorController.selectedRows);
                               Navigator.pop(context);
                             }
                           : null,
