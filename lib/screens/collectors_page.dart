@@ -22,6 +22,7 @@ class _CollectorsPageState extends State<CollectorsPage> {
   final List<GridColumn> columns = <GridColumn>[
     GridColumn(
       columnName: 'id',
+      maximumWidth: 100,
       label: Container(
         padding: const EdgeInsets.all(16.0),
         alignment: Alignment.centerRight,
@@ -30,7 +31,6 @@ class _CollectorsPageState extends State<CollectorsPage> {
     ),
     GridColumn(
       columnName: 'lastName',
-      width: 200,
       label: Container(
         padding: const EdgeInsets.all(16.0),
         alignment: Alignment.centerLeft,
@@ -39,7 +39,6 @@ class _CollectorsPageState extends State<CollectorsPage> {
     ),
     GridColumn(
       columnName: 'firstName',
-      width: 200,
       label: Container(
         padding: const EdgeInsets.all(16.0),
         alignment: Alignment.centerLeft,
@@ -48,7 +47,6 @@ class _CollectorsPageState extends State<CollectorsPage> {
     ),
     GridColumn(
       columnName: 'secondName',
-      width: 200,
       label: Container(
         padding: const EdgeInsets.all(16.0),
         alignment: Alignment.centerLeft,
@@ -81,6 +79,7 @@ class _CollectorsPageState extends State<CollectorsPage> {
         }
         return ContextMenuOverlay(
             child: SfDataGrid(
+                columnWidthMode: ColumnWidthMode.fill,
                 allowFiltering: true,
                 allowSorting: true,
                 allowMultiColumnSorting: true,

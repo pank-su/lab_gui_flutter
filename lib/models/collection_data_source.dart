@@ -6,11 +6,13 @@ import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import '../my_app_state.dart';
 import 'collection_item.dart';
+import 'package:intl/intl.dart';
 
 /// Источник данных для таблицы
 class CollectionDataSource extends DataGridSource {
   BuildContext context;
   final List<CollectionItem> collectionItems;
+  final DateFormat formatter = DateFormat('dd.MM.y');
 
   void updateCollectionItems(List<CollectionItem> collectionItems) {
     context = context;
@@ -42,7 +44,7 @@ class CollectionDataSource extends DataGridSource {
                   columnName: 'subregion', value: item.subregion),
               DataGridCell<String?>(
                   columnName: 'geoComment', value: item.geoComment),
-              DataGridCell<String?>(columnName: 'date', value: item.date),
+              DataGridCell<DateTime?>(columnName: 'date', value: item.date),
               DataGridCell<bool?>(columnName: 'rna', value: item.rna),
               DataGridCell<String?>(columnName: 'comment', value: item.comment),
               DataGridCell<String?>(
@@ -64,6 +66,8 @@ class CollectionDataSource extends DataGridSource {
   DataGridRowAdapter? buildRow(DataGridRow row) {
     var appState = Provider.of<MyAppState>(context,
         listen: false); // Проcлушивание не нужно
+    var collectionItem = appState.collection
+        .firstWhere((element) => element.id == row.getCells().first.value);
     return DataGridRowAdapter(
         cells: row.getCells().map<Widget>((dataGridCell) {
       return ContextMenuRegion(
@@ -72,21 +76,40 @@ class CollectionDataSource extends DataGridSource {
                 onPressed: !appState.isAuth
                     ? null
                     : () {
-                        var id = row.getCells().first.value as int;
-                        appState.setSelectedCollectorsById(id);
-                        appState.setTopologyByColId(id);
+                        appState.setSelectedCollectorsById(collectionItem.id);
+                        appState.setTopologyByColId(collectionItem.id);
                         showDialog(
                             context: context,
                             builder: (context) {
                               return AddCollectionItemDialog(
                                 isUpdate: true,
-                                updatableId: id,
+                                updatableId: collectionItem.id,
                               );
                             });
                       })
           ]),
           child: LayoutBuilder(
             builder: (context, constraints) {
+              if (dataGridCell.columnName == 'date') {
+                if (dataGridCell.value == null) return Container();
+                String formattedString;
+                switch (collectionItem.dateType) {
+                  case DateType.all:
+                    formattedString = formatter.format(dataGridCell.value);
+                    break;
+                  case DateType.mounthAndYear:
+                    formattedString =
+                        DateFormat("MM.y").format(dataGridCell.value);
+                  case DateType.year:
+                    formattedString =
+                        DateFormat("y").format(dataGridCell.value);
+                }
+                return Container(
+                  alignment: Alignment.centerRight,
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(formattedString),
+                );
+              }
               if (dataGridCell.columnName == 'rna') {
                 return Container(
                   alignment: Alignment.center,
@@ -97,11 +120,7 @@ class CollectionDataSource extends DataGridSource {
                 );
               }
               if (dataGridCell.columnName == 'id') {
-                if (appState.collection
-                        .firstWhere(
-                            (element) => element.id == dataGridCell.value)
-                        .hasFile ??
-                    false) {
+                if (collectionItem.hasFile ?? false) {
                   return Container(
                       alignment: Alignment.center,
                       padding: const EdgeInsets.all(16.0),

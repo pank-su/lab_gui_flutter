@@ -123,7 +123,8 @@ class MyAppState extends ChangeNotifier {
     try {
       collection = await getCollection();
       collectors = await getCollectors();
-    } on Exception catch (_) {
+    } on Exception catch (e) {
+      print(e);
       state = Error();
       notifyListeners();
       return;
@@ -144,7 +145,7 @@ class MyAppState extends ChangeNotifier {
   Future<void> autoUpdate() async {
     while (true) {
       restartNow();
-      await Future.delayed(const Duration(minutes: 1));
+      await Future.delayed(const Duration(minutes: 15));
     }
   }
 }
