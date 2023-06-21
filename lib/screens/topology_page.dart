@@ -82,7 +82,8 @@ class _TopologyPageState extends State<TopologyPage> {
         treeController.expand(baseModel);
       };
     } else if (baseModel.type == BaseModelsTypes.kind ||
-        baseModel.name == null) {
+        baseModel.name == null ||
+        children!.isEmpty) {
       isOpen = null;
       onPressed = null;
     } else {
@@ -118,59 +119,76 @@ class _TopologyPageState extends State<TopologyPage> {
             var parent = entry.node.type == BaseModelsTypes.order
                 ? father
                 : entry.node.parent;
-            if (appState.isAuth &&
-                !widget.selectableMode &&
-                !entry.isExpanded &&
-                childrenMap[parent]!.indexOf(entry.node) ==
-                    childrenMap[parent]!.length - 1) {
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  TreeIndentation(
-                      entry: entry,
-                      child: Row(
-                        children: [
-                          getLeading(entry.node),
-                          Text(entry.node.name ?? "")
-                        ],
-                      )),
-                  IconButton.filled(
-                    onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AddTopologyDialog(
-                              selectedBaseModel: parent,
-                            );
-                          });
-                    },
-                    icon: const Icon(Icons.add),
-                    alignment: Alignment.topLeft,
-                  )
-                ],
-              );
-            }
-            return TreeIndentation(
-                entry: entry,
-                child: Row(children: [
-                  getLeading(entry.node),
-                  widget.selectableMode
-                      ? Container(
-                          color: selectableBaseModel != null &&
-                                  entry.node.id == selectableBaseModel!.id &&
-                                  entry.node.name == selectableBaseModel!.name
-                              ? Theme.of(context).colorScheme.primaryContainer
-                              : Colors.transparent,
-                          child: GestureDetector(
-                            child: Text(entry.node.name ?? ""),
-                            onTap: () {
-                              setState(() {
-                                selectableBaseModel = entry.node;
-                              });
-                            },
-                          ))
-                      : Text(entry.node.name ?? "")
-                ]));
+
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                TreeIndentation(
+                    entry: entry,
+                    child: Row(
+                      children: [
+                        getLeading(entry.node),
+                        widget.selectableMode
+                            ? Container(
+                                color: selectableBaseModel != null &&
+                                        selectableBaseModel! == entry.node
+                                    ? Theme.of(context)
+                                        .colorScheme
+                                        .primaryContainer
+                                    : Colors.transparent,
+                                child: GestureDetector(
+                                  child: Text(entry.node.name ?? ""),
+                                  onTap: () {
+                                    setState(() {
+                                      selectableBaseModel = entry.node;
+                                    });
+                                  },
+                                ))
+                            : Text(entry.node.name ?? "")
+                      ],
+                    )),
+                appState.isAuth &&
+                        childrenMap[parent]!.indexOf(entry.node) ==
+                            childrenMap[parent]!.length - 1
+                    ? Row(children: [
+                        SizedBox(
+                          width: entry.level * 40,
+                        ),
+                        IconButton(
+                          iconSize: 24,
+                          onPressed: () {
+                            showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return AddTopologyDialog(
+                                    selectedBaseModel: parent,
+                                  );
+                                });
+                          },
+                          icon: const Icon(Icons.add),
+                          alignment: Alignment.topLeft,
+                        ),
+                        const SizedBox(
+                          width: 10,
+                        ),
+                        LayoutBuilder(builder: (context, constraints) {
+                          switch (entry.node.type) {
+                            case BaseModelsTypes.order:
+                              return const Text("Добавить новый отряд");
+                            case BaseModelsTypes.family:
+                              return const Text("Добавить новое семейство");
+                            case BaseModelsTypes.genus:
+                              return const Text("Добавить новый род");
+                            case BaseModelsTypes.kind:
+                              return const Text("Добавить новый вид");
+                            case BaseModelsTypes.father:
+                              return const Text("Вы программист?");
+                          }
+                        })
+                      ])
+                    : const SizedBox()
+              ],
+            );
           }),
       widget.selectableMode
           ? Container(
