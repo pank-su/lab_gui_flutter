@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:lab_gui_flutter/my_app_state.dart';
@@ -6,8 +8,6 @@ import 'package:provider/provider.dart';
 
 import '../models/base_model.dart';
 import '../repository.dart';
-
-
 
 class TopologyPage extends StatefulWidget {
   const TopologyPage({super.key, required this.selectableMode});
@@ -81,7 +81,8 @@ class _TopologyPageState extends State<TopologyPage> {
         loadingModels.remove(baseModel);
         treeController.expand(baseModel);
       };
-    } else if (baseModel.type == BaseModelsTypes.kind) {
+    } else if (baseModel.type == BaseModelsTypes.kind ||
+        baseModel.name == null) {
       isOpen = null;
       onPressed = null;
     } else {
@@ -111,6 +112,9 @@ class _TopologyPageState extends State<TopologyPage> {
       AnimatedTreeView(
           treeController: treeController,
           nodeBuilder: (context, entry) {
+            if (entry.node.name == null || entry.node.name!.trim().isEmpty) {
+              return SizedBox();
+            }
             var parent = entry.node.type == BaseModelsTypes.order
                 ? father
                 : entry.node.parent;
@@ -135,7 +139,9 @@ class _TopologyPageState extends State<TopologyPage> {
                       showDialog(
                           context: context,
                           builder: (context) {
-                            return AddTopologyDialog(selectedBaseModel: parent,);
+                            return AddTopologyDialog(
+                              selectedBaseModel: parent,
+                            );
                           });
                     },
                     icon: const Icon(Icons.add),
