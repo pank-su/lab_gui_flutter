@@ -245,11 +245,11 @@ class _CollectionPageState extends State<CollectionPage> {
 
     switch (appState.state) {
       case Error():
-        return ErrorIndicator(
+        return Center(child: ErrorIndicator(
           buttonFNC: () {
             appState.restartNow();
           },
-        );
+        ));
       case Loading():
         return const LoadingIndicator();
       default:

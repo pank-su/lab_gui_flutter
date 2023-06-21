@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:lab_gui_flutter/models/collector.dart';
 import 'package:lab_gui_flutter/screens/loading_indicator.dart';
 import 'package:provider/provider.dart';
+import 'package:syncfusion_flutter_core/theme.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import '../my_app_state.dart';
+import 'error_indicator.dart';
 
 class CollectorsPage extends StatefulWidget {
   const CollectorsPage({super.key, required this.selectableMode});
@@ -34,7 +36,7 @@ class _CollectorsPageState extends State<CollectorsPage> {
       label: Container(
         padding: const EdgeInsets.all(16.0),
         alignment: Alignment.centerLeft,
-        child: const Text('Last Name'),
+        child: const Text('Фамилия'),
       ),
     ),
     GridColumn(
@@ -42,7 +44,7 @@ class _CollectorsPageState extends State<CollectorsPage> {
       label: Container(
         padding: const EdgeInsets.all(16.0),
         alignment: Alignment.centerLeft,
-        child: const Text('First Name'),
+        child: const Text('Имя'),
       ),
     ),
     GridColumn(
@@ -50,43 +52,45 @@ class _CollectorsPageState extends State<CollectorsPage> {
       label: Container(
         padding: const EdgeInsets.all(16.0),
         alignment: Alignment.centerLeft,
-        child: const Text('Second Name'),
+        child: const Text('Отчетство'),
       ),
     ),
   ];
 
-  final DataGridController _dataGridController = DataGridController();
-
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
+    var theme = Theme.of(context);
     appState.collectorDataSource.context = context;
+    switch (appState.state) {
+      case Error():
+        return Center(child: ErrorIndicator(
+          buttonFNC: () {
+            appState.restartNow();
+          },
+        ));
+      case Loading():
+        return const LoadingIndicator();
+      default:
+        break;
+    }
 
     return Stack(children: [
       LayoutBuilder(builder: (context, constraints) {
-        if (appState.isRestart || appState.collectors.isEmpty) {
-          return const LoadingIndicator();
-        }
-        if (widget.selectableMode) {
-          return SfDataGrid(
-              allowFiltering: true,
-              allowSorting: true,
-              allowMultiColumnSorting: true,
-              controller: appState.collectorController,
-              selectionMode: SelectionMode.multiple,
-              source: appState.collectorDataSource,
-              columns: columns);
-        }
         return ContextMenuOverlay(
-            child: SfDataGrid(
-                columnWidthMode: ColumnWidthMode.fill,
-                allowFiltering: true,
-                allowSorting: true,
-                allowMultiColumnSorting: true,
-                controller: appState.collectorController,
-                selectionMode: SelectionMode.multiple,
-                source: appState.collectorDataSource,
-                columns: columns));
+            child: SfDataGridTheme(
+                data: SfDataGridThemeData(
+                    headerColor: theme.colorScheme.primaryContainer,
+                    selectionColor: theme.colorScheme.secondaryContainer),
+                child: SfDataGrid(
+                    columnWidthMode: ColumnWidthMode.fill,
+                    allowFiltering: true,
+                    allowSorting: true,
+                    allowMultiColumnSorting: true,
+                    controller: appState.collectorController,
+                    selectionMode: SelectionMode.multiple,
+                    source: appState.collectorDataSource,
+                    columns: columns)));
       }),
       widget.selectableMode
           ? Container(
