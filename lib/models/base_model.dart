@@ -1,4 +1,10 @@
-enum BaseModelsTypes { order, family, genus, kind, father }
+enum BaseModelsTypes {
+  father,
+  order,
+  family,
+  genus,
+  kind,
+}
 
 /// Класс который работает с топологией
 /// [id] - идентификатор
@@ -11,12 +17,16 @@ class BaseModel {
   BaseModelsTypes type;
   BaseModel? parent;
 
-  BaseModel({required this.id, required this.name, required this.type, this.parent});
+  BaseModel(
+      {required this.id, required this.name, required this.type, this.parent});
 
   factory BaseModel.fromJson(Map<String, dynamic> json, BaseModelsTypes type,
       {BaseModel? parent}) {
     return BaseModel(
-        id: json['id'] as int, name: json['name'] as String?, type: type, parent: parent);
+        id: json['id'] as int,
+        name: json['name'] as String?,
+        type: type,
+        parent: parent);
   }
 
   Map<String, dynamic> toJson() {
@@ -27,24 +37,28 @@ class BaseModel {
   }
 
   /// Получение списка топологии
-  List<String> getFullTopology(){
+  List<String> getFullTopology() {
     var first = this;
     List<String> topology = List.empty(growable: true);
     topology.add(first.name ?? "");
-    while (first.parent != null){
+    while (first.parent != null) {
       first = first.parent!;
       topology.add(first.name ?? "");
     }
-    
+
     return topology.reversed.toList();
   }
 
   @override
   String toString() {
-     return "$id $name";
+    return "$id $name";
   }
 
-
   @override
-  bool operator ==(dynamic other) => other != null && other is BaseModel && other.type == type && other.id == id && other.name == name;
+  bool operator ==(dynamic other) =>
+      other != null &&
+      other is BaseModel &&
+      other.type == type &&
+      other.id == id &&
+      other.name == name;
 }

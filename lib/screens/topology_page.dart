@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:lab_gui_flutter/my_app_state.dart';
@@ -26,7 +24,7 @@ class _TopologyPageState extends State<TopologyPage> {
   };
   late final TreeController<BaseModel> treeController;
 
-  Map<BaseModel, List<BaseModel>> childrenMap = {};
+  Map<BaseModel, List<BaseModel>> childrenTopologyMap = {};
   BaseModel father =
       BaseModel(id: 0, name: "father", type: BaseModelsTypes.father);
 
@@ -37,14 +35,17 @@ class _TopologyPageState extends State<TopologyPage> {
   Future<void> loadOrders() async {
     var orders = await getOrders();
     setState(() {
-      childrenMap[father] = orders;
+      childrenTopologyMap[father] = orders
+          .where((element) =>
+              element.name != null && element.name!.trim().isNotEmpty)
+          .toList();
       treeController.roots = childrenProvider(father);
     });
   }
 
   @override
   void initState() {
-    childrenMap[father] = [];
+    childrenTopologyMap[father] = [];
 
     treeController = TreeController(
         roots: childrenProvider(father), childrenProvider: childrenProvider);
@@ -55,7 +56,7 @@ class _TopologyPageState extends State<TopologyPage> {
   }
 
   Iterable<BaseModel> childrenProvider(BaseModel baseModel) {
-    return childrenMap[baseModel] ?? const Iterable.empty();
+    return childrenTopologyMap[baseModel] ?? const Iterable.empty();
   }
 
   Widget getLeading(BaseModel baseModel) {
@@ -66,7 +67,7 @@ class _TopologyPageState extends State<TopologyPage> {
     late final VoidCallback? onPressed;
     late final bool? isOpen;
 
-    final List<BaseModel>? children = childrenMap[baseModel];
+    final List<BaseModel>? children = childrenTopologyMap[baseModel];
 
     if (baseModel.name != null &&
         baseModel.type != BaseModelsTypes.kind &&
@@ -76,8 +77,12 @@ class _TopologyPageState extends State<TopologyPage> {
         setState(() {
           loadingModels.add(baseModel);
         });
-        final list = await topology[baseModel.type]!(baseModel);
-        childrenMap[baseModel] = list;
+        var list = await topology[baseModel.type]!(baseModel);
+
+        childrenTopologyMap[baseModel] = list
+            .where((element) =>
+                element.name != null && element.name!.trim().isNotEmpty)
+            .toList();
         loadingModels.remove(baseModel);
         treeController.expand(baseModel);
       };
@@ -113,9 +118,6 @@ class _TopologyPageState extends State<TopologyPage> {
       AnimatedTreeView(
           treeController: treeController,
           nodeBuilder: (context, entry) {
-            if (entry.node.name == null || entry.node.name!.trim().isEmpty) {
-              return SizedBox();
-            }
             var parent = entry.node.type == BaseModelsTypes.order
                 ? father
                 : entry.node.parent;
@@ -148,8 +150,8 @@ class _TopologyPageState extends State<TopologyPage> {
                       ],
                     )),
                 appState.isAuth &&
-                        childrenMap[parent]!.indexOf(entry.node) ==
-                            childrenMap[parent]!.length - 1
+                        childrenTopologyMap[parent]!.indexOf(entry.node) ==
+                            childrenTopologyMap[parent]!.length - 1
                     ? Row(children: [
                         SizedBox(
                           width: entry.level * 40,
@@ -182,7 +184,8 @@ class _TopologyPageState extends State<TopologyPage> {
                             case BaseModelsTypes.kind:
                               return const Text("Добавить новый вид");
                             case BaseModelsTypes.father:
-                              return const Text("Вы программист?");
+                              return const Text(
+                                  "Вы программист?"); // Этот пункт никогда не должен быть использован
                           }
                         })
                       ])

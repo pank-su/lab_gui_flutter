@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_session_manager/flutter_session_manager.dart';
 import 'package:lab_gui_flutter/models/collection_data_source.dart';
 import 'package:lab_gui_flutter/models/collector_data_source.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
 import 'models/base_model.dart';
@@ -81,7 +81,8 @@ class MyAppState extends ChangeNotifier {
   /// Проверка токена на сервере
   // TODO сделать isolate
   Future<void> checkToken() async {
-    token = await SessionManager().get("token");
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    token = prefs.getString("token");
     if (token != null && token != "") {
       try {
         testRequest(token!);
@@ -97,7 +98,8 @@ class MyAppState extends ChangeNotifier {
   Future<void> auth(String login_, String password) async {
     Jwt jwt = await login(login_, password);
     token = jwt.token;
-    await SessionManager().set("token", token);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("token", token!);
     isAuth = true;
     notifyListeners();
   }
@@ -107,7 +109,8 @@ class MyAppState extends ChangeNotifier {
   Future<void> logout() async {
     token = null;
     isAuth = false;
-    await SessionManager().set("token", "");
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString("token", "");
     notifyListeners();
   }
 

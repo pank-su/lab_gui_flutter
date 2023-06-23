@@ -17,12 +17,14 @@ dependencies:
   syncfusion_flutter_datagrid: ^21.2.4
   syncfusion_flutter_core: ^21.2.4
   flutter_fancy_tree_view: ^1.1.1
-  flutter_session_manager: ^1.0.3
   flutter_map: ^4.0.0
   latlong2: ^0.8.1
   osm_nominatim: ^2.0.1
   context_menus: ^1.0.2
   responsive_grid: ^2.3.0
+  syncfusion_localizations: ^21.2.4
+  shared_preferences: ^2.1.2
+  dropdown_button2: ^2.1.2
   flutter_localizations:
     sdk: flutter
 

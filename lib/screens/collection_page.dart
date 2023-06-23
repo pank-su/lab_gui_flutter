@@ -256,11 +256,12 @@ class _CollectionPageState extends State<CollectionPage> {
         break;
     }
     // Здесь необходим LayoutBuilder,
-    //  потому что иначе flutter не видит обновлений и не хочет обновлять таблицу
+    // потому что иначе flutter не видит обновлений и не хочет обновлять таблицу
+    // при изменении размеров окна
     return LayoutBuilder(builder: (context, constraints) {
       return ContextMenuOverlay(
           child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(0),
               child: SfDataGridTheme(
                   data: SfDataGridThemeData(
                       headerColor: theme.colorScheme.primaryContainer,
