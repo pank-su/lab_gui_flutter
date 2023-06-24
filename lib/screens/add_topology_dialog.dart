@@ -69,9 +69,6 @@ class _AddTopologyDialogState extends State<AddTopologyDialog> {
                   ))
               .toList(),
         )),
-        LayoutBuilder(builder: (context, contrants) {
-          return SizedBox();
-        }),
         TextField(
           decoration: InputDecoration(
               border: const OutlineInputBorder(),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:lab_gui_flutter/models/collection_data_source.dart';
 import 'package:lab_gui_flutter/models/collector_data_source.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -40,6 +41,10 @@ class MyAppState extends ChangeNotifier {
     collectorDataSource = CollectorDataSource(collectors, context);
     autoUpdate();
     checkToken();
+    childrenTopologyMap[father] = [];
+    treeController = TreeController(
+        roots: childrenProvider(father), childrenProvider: childrenProvider);
+    loadOrders();
   }
 
   Future<void> resetSelected() async {
@@ -151,4 +156,29 @@ class MyAppState extends ChangeNotifier {
       await Future.delayed(const Duration(minutes: 15));
     }
   }
+
+  Iterable<BaseModel> childrenProvider(BaseModel baseModel) {
+    return childrenTopologyMap[baseModel] ?? const Iterable.empty();
+  }
+
+  late final TreeController<BaseModel> treeController;
+
+  BaseModel father =
+      BaseModel(id: 0, name: "father", type: BaseModelsTypes.father);
+
+  var loadingModels = <BaseModel>[];
+
+  BaseModel? selectableBaseModel;
+
+  Future<void> loadOrders() async {
+    var orders = await getOrders();
+
+    childrenTopologyMap[father] = orders
+        .where((element) =>
+            element.name != null && element.name!.trim().isNotEmpty)
+        .toList();
+    treeController.roots = childrenProvider(father);
+  }
+
+  Map<BaseModel, List<BaseModel>> childrenTopologyMap = {};
 }

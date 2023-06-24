@@ -22,69 +22,40 @@ class _TopologyPageState extends State<TopologyPage> {
     BaseModelsTypes.family: getGenusesById,
     BaseModelsTypes.genus: getKindsById,
   };
-  late final TreeController<BaseModel> treeController;
-
-  Map<BaseModel, List<BaseModel>> childrenTopologyMap = {};
-  BaseModel father =
-      BaseModel(id: 0, name: "father", type: BaseModelsTypes.father);
-
-  var loadingModels = <BaseModel>[];
-
-  BaseModel? selectableBaseModel;
-
-  Future<void> loadOrders() async {
-    var orders = await getOrders();
-    setState(() {
-      childrenTopologyMap[father] = orders
-          .where((element) =>
-              element.name != null && element.name!.trim().isNotEmpty)
-          .toList();
-      treeController.roots = childrenProvider(father);
-    });
-  }
 
   @override
   void initState() {
-    childrenTopologyMap[father] = [];
-
-    treeController = TreeController(
-        roots: childrenProvider(father), childrenProvider: childrenProvider);
-
-    loadOrders();
-
     super.initState();
   }
 
-  Iterable<BaseModel> childrenProvider(BaseModel baseModel) {
-    return childrenTopologyMap[baseModel] ?? const Iterable.empty();
-  }
-
   Widget getLeading(BaseModel baseModel) {
-    if (loadingModels.contains(baseModel)) {
+    var appState = context.watch<MyAppState>();
+
+    if (appState.loadingModels.contains(baseModel)) {
       return const CircularProgressIndicator();
     }
 
     late final VoidCallback? onPressed;
     late final bool? isOpen;
 
-    final List<BaseModel>? children = childrenTopologyMap[baseModel];
+    final List<BaseModel>? children = appState.childrenTopologyMap[baseModel];
 
     if (baseModel.name != null &&
         baseModel.type != BaseModelsTypes.kind &&
         children == null) {
       isOpen = false;
       onPressed = () async {
-        setState(() {
-          loadingModels.add(baseModel);
-        });
+        appState.loadingModels.add(baseModel);
+        appState.notifyListeners();
+
         var list = await topology[baseModel.type]!(baseModel);
 
-        childrenTopologyMap[baseModel] = list
+        appState.childrenTopologyMap[baseModel] = list
             .where((element) =>
                 element.name != null && element.name!.trim().isNotEmpty)
             .toList();
-        loadingModels.remove(baseModel);
-        treeController.expand(baseModel);
+        appState.loadingModels.remove(baseModel);
+        appState.treeController.expand(baseModel);
       };
     } else if (baseModel.type == BaseModelsTypes.kind ||
         baseModel.name == null ||
@@ -92,8 +63,8 @@ class _TopologyPageState extends State<TopologyPage> {
       isOpen = null;
       onPressed = null;
     } else {
-      isOpen = treeController.getExpansionState(baseModel);
-      onPressed = () => treeController.toggleExpansion(baseModel);
+      isOpen = appState.treeController.getExpansionState(baseModel);
+      onPressed = () => appState.treeController.toggleExpansion(baseModel);
     }
 
     return FolderButton(
@@ -109,17 +80,17 @@ class _TopologyPageState extends State<TopologyPage> {
     var appState = context.watch<MyAppState>();
     if (widget.selectableMode && !firstSelect) {
       setState(() {
-        selectableBaseModel = appState.selectedBaseModel;
+        appState.selectableBaseModel = appState.selectedBaseModel;
         firstSelect = true;
       });
     }
 
     return Stack(children: [
       AnimatedTreeView(
-          treeController: treeController,
+          treeController: appState.treeController,
           nodeBuilder: (context, entry) {
             var parent = entry.node.type == BaseModelsTypes.order
-                ? father
+                ? appState.father
                 : entry.node.parent;
 
             return Column(
@@ -132,8 +103,9 @@ class _TopologyPageState extends State<TopologyPage> {
                         getLeading(entry.node),
                         widget.selectableMode
                             ? Container(
-                                color: selectableBaseModel != null &&
-                                        selectableBaseModel! == entry.node
+                                color: appState.selectableBaseModel != null &&
+                                        appState.selectableBaseModel! ==
+                                            entry.node
                                     ? Theme.of(context)
                                         .colorScheme
                                         .primaryContainer
@@ -142,7 +114,7 @@ class _TopologyPageState extends State<TopologyPage> {
                                   child: Text(entry.node.name ?? ""),
                                   onTap: () {
                                     setState(() {
-                                      selectableBaseModel = entry.node;
+                                      appState.selectableBaseModel = entry.node;
                                     });
                                   },
                                 ))
@@ -150,8 +122,9 @@ class _TopologyPageState extends State<TopologyPage> {
                       ],
                     )),
                 appState.isAuth &&
-                        childrenTopologyMap[parent]!.indexOf(entry.node) ==
-                            childrenTopologyMap[parent]!.length - 1
+                        appState.childrenTopologyMap[parent]!
+                                .indexOf(entry.node) ==
+                            appState.childrenTopologyMap[parent]!.length - 1
                     ? Row(children: [
                         SizedBox(
                           width: entry.level * 40,
@@ -199,10 +172,10 @@ class _TopologyPageState extends State<TopologyPage> {
               child: Align(
                   alignment: Alignment.bottomRight,
                   child: FilledButton(
-                      onPressed: selectableBaseModel != null
+                      onPressed: appState.selectableBaseModel != null
                           ? () {
-                              appState
-                                  .setSelectedBaseModel(selectableBaseModel);
+                              appState.setSelectedBaseModel(
+                                  appState.selectableBaseModel);
                               Navigator.pop(context);
                             }
                           : null,
