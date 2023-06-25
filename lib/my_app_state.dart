@@ -19,6 +19,9 @@ class Loading extends TableState {}
 
 class Loaded extends TableState {}
 
+final BaseModel FATHER =
+    BaseModel(id: 0, name: "father", type: BaseModelsTypes.father);
+
 class MyAppState extends ChangeNotifier {
   // Авторизация
   var isAuth = false;
@@ -41,9 +44,9 @@ class MyAppState extends ChangeNotifier {
     collectorDataSource = CollectorDataSource(collectors, context);
     autoUpdate();
     checkToken();
-    childrenTopologyMap[father] = [];
+    childrenTopologyMap[FATHER] = [];
     treeController = TreeController(
-        roots: childrenProvider(father), childrenProvider: childrenProvider);
+        roots: childrenProvider(FATHER), childrenProvider: childrenProvider);
     loadOrders();
   }
 
@@ -163,9 +166,6 @@ class MyAppState extends ChangeNotifier {
 
   late final TreeController<BaseModel> treeController;
 
-  BaseModel father =
-      BaseModel(id: 0, name: "father", type: BaseModelsTypes.father);
-
   var loadingModels = <BaseModel>[];
 
   BaseModel? selectableBaseModel;
@@ -173,11 +173,11 @@ class MyAppState extends ChangeNotifier {
   Future<void> loadOrders() async {
     var orders = await getOrders();
 
-    childrenTopologyMap[father] = orders
+    childrenTopologyMap[FATHER] = orders
         .where((element) =>
             element.name != null && element.name!.trim().isNotEmpty)
         .toList();
-    treeController.roots = childrenProvider(father);
+    treeController.roots = childrenProvider(FATHER);
   }
 
   Map<BaseModel, List<BaseModel>> childrenTopologyMap = {};

@@ -90,7 +90,7 @@ class _TopologyPageState extends State<TopologyPage> {
           treeController: appState.treeController,
           nodeBuilder: (context, entry) {
             var parent = entry.node.type == BaseModelsTypes.order
-                ? appState.father
+                ? FATHER
                 : entry.node.parent;
 
             return Column(

@@ -59,6 +59,7 @@ class BaseModel {
       other != null &&
       other is BaseModel &&
       other.type == type &&
+      other.parent == parent &&
       other.id == id &&
       other.name == name;
 }
