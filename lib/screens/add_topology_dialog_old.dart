@@ -23,6 +23,8 @@ const Map<BaseModelsTypes, String> baseModelToTopologyName = {
   BaseModelsTypes.kind: 'Вид'
 };
 
+// Не работает!!!!
+// Если вы придумали способ исправления пишите мне на pank@pank.su
 class AddTopologyDialog extends StatefulWidget {
   final BaseModel? selectedBaseModel;
   const AddTopologyDialog({super.key, this.selectedBaseModel});
@@ -35,6 +37,8 @@ class AddTopologyDialog extends StatefulWidget {
 class _AddTopologyDialogState extends State<AddTopologyDialog> {
   BaseModelsTypes type = BaseModelsTypes.order;
   late BaseModel selectedBaseModel = widget.selectedBaseModel ?? FATHER;
+  var values = <BaseModel?>[null, null, null, null];
+  var itemsOfItems = <List<BaseModel>?>[null, null, null, null];
 
   final topology = {
     BaseModelsTypes.order: getOrders,
@@ -52,9 +56,11 @@ class _AddTopologyDialogState extends State<AddTopologyDialog> {
   }
 
   // Нужно сделать так чтобы значение отсылались на переменную, которую мы можем перезагрузить, чтобы не вызвать ошибку
-  Future<List<Widget>> getCurrentDropDowns() async {
+  Future<List<Widget>> getCurrentDropDowns(
+      List<BaseModel?> values, List<List<BaseModel>?> itemsOfItems) async {
     var children = <Widget>[];
     BaseModel? father = selectedBaseModel;
+    int index = 0;
     while ((father?.type ?? BaseModelsTypes.father) != BaseModelsTypes.father) {
       List<BaseModel> models;
       if (father?.type == BaseModelsTypes.order) {
@@ -62,11 +68,16 @@ class _AddTopologyDialogState extends State<AddTopologyDialog> {
       } else {
         models = await topology[father?.type]!(father!.parent);
       }
+      values[index] = father;
+      itemsOfItems[index] = models;
       children.add(DropdownButtonHideUnderline(
         child: DropdownButton2(
-            isDense: true,
-            value: father,
+            value: values[index],
             onChanged: (value) async {
+              setState(() {
+                this.itemsOfItems = [null, null, null, null];
+                this.values = [null, null, null, null];
+              });
               BaseModel? father = selectedBaseModel;
               var structure = <BaseModel>[];
               while ((father?.type ?? BaseModelsTypes.father) !=
@@ -91,16 +102,17 @@ class _AddTopologyDialogState extends State<AddTopologyDialog> {
                 }
               }
 
-              // setState(() {
-              //   selectedBaseModel = newBaseModel;
-              // });
+              setState(() {
+                selectedBaseModel = newBaseModel;
+              });
             },
-            items: models
+            items: itemsOfItems[index]!
                 .map((e) => DropdownMenuItem<BaseModel>(
                     value: e, child: Text(e?.name ?? "")))
                 .toList()),
       ));
       father = father?.parent;
+      index++;
     }
     return children.reversed.toList();
   }
@@ -133,7 +145,7 @@ class _AddTopologyDialogState extends State<AddTopologyDialog> {
               .toList(),
         )),
         FutureBuilder(
-            future: getCurrentDropDowns(),
+            future: getCurrentDropDowns(values, itemsOfItems),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return Column(

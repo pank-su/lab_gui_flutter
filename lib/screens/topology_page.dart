@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:lab_gui_flutter/my_app_state.dart';
-import 'package:lab_gui_flutter/screens/add_topology_dialog.dart';
+import 'package:lab_gui_flutter/screens/add_topology_dialog_old.dart';
 import 'package:provider/provider.dart';
 
 import '../models/base_model.dart';
@@ -27,6 +28,12 @@ class _TopologyPageState extends State<TopologyPage> {
   void initState() {
     super.initState();
   }
+
+  bool isAdding = false;
+
+  BaseModel? addedParent;
+
+  TextEditingController _textEditingController = TextEditingController();
 
   Widget getLeading(BaseModel baseModel) {
     var appState = context.watch<MyAppState>();
@@ -93,6 +100,9 @@ class _TopologyPageState extends State<TopologyPage> {
                 ? FATHER
                 : entry.node.parent;
 
+            String title =
+                baseModelToTopologyName[entry.node.type]?.toLowerCase() ?? "";
+
             return Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -125,42 +135,56 @@ class _TopologyPageState extends State<TopologyPage> {
                         appState.childrenTopologyMap[parent]!
                                 .indexOf(entry.node) ==
                             appState.childrenTopologyMap[parent]!.length - 1
-                    ? Row(children: [
-                        SizedBox(
-                          width: entry.level * 40,
-                        ),
-                        IconButton(
-                          iconSize: 24,
-                          onPressed: () {
-                            showDialog(
-                                context: context,
-                                builder: (context) {
-                                  return AddTopologyDialog(
-                                    selectedBaseModel: parent,
-                                  );
-                                });
-                          },
-                          icon: const Icon(Icons.add),
-                          alignment: Alignment.topLeft,
-                        ),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        LayoutBuilder(builder: (context, constraints) {
-                          switch (entry.node.type) {
-                            case BaseModelsTypes.order:
-                              return const Text("Добавить новый отряд");
-                            case BaseModelsTypes.family:
-                              return const Text("Добавить новое семейство");
-                            case BaseModelsTypes.genus:
-                              return const Text("Добавить новый род");
-                            case BaseModelsTypes.kind:
-                              return const Text("Добавить новый вид");
-                            case BaseModelsTypes.father:
-                              return const Text(
-                                  "Вы программист?"); // Этот пункт никогда не должен быть использован
-                          }
-                        })
+                    ? Column(children: [
+                        Row(children: [
+                          SizedBox(
+                            width: entry.level * 40,
+                          ),
+                          IconButton(
+                            iconSize: 24,
+                            onPressed: () {
+                              setState(() {
+                                isAdding = true;
+                                addedParent = parent;
+                              });
+                            },
+                            icon: const Icon(Icons.add),
+                            alignment: Alignment.topLeft,
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          LayoutBuilder(builder: (context, constraints) {
+                            if (title == "семейств") {
+                              return Text("Добавить новое ${title}о");
+                            } else {
+                              return Text("Добавить новый ${title}");
+                            }
+                          })
+                        ]),
+                        isAdding && addedParent == parent
+                            ? Row(children: [
+                                SizedBox(
+                                  width: entry.level * 40,
+                                ),
+                                SizedBox(
+                                  width: 250,
+                                  child: TextField(
+                                      controller: _textEditingController,
+                                      decoration: InputDecoration(
+                                          border: const OutlineInputBorder(),
+                                          label: Text("Название ${title}а"))),
+                                ),
+                                IconButton(
+                                    onPressed: () {
+                                      addBaseModel(
+                                          parent ?? FATHER,
+                                          _textEditingController.text,
+                                          appState.token!);
+                                    },
+                                    icon: const Icon(Icons.done))
+                              ])
+                            : const SizedBox()
                       ])
                     : const SizedBox()
               ],

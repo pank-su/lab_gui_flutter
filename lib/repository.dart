@@ -5,6 +5,7 @@ import 'package:lab_gui_flutter/models/base_model.dart';
 import 'package:lab_gui_flutter/models/collection_dto.dart';
 import 'package:lab_gui_flutter/models/collection_item.dart';
 import 'package:lab_gui_flutter/models/jwt.dart';
+import 'package:lab_gui_flutter/my_app_state.dart';
 
 import 'models/collector.dart';
 import 'models/user.dart';
@@ -431,25 +432,18 @@ final topology = [
 ];
 
 Future<void> addBaseModel(
-  BaseModelsTypes type,
-  int parentId,
+  BaseModel baseModel,
   String name,
   String token,
 ) async {
-  var url = Uri.http(URL, type.name);
-  Map<String, String> body;
-  try {
-    var parent = topology[topology.indexOf(type) - 1];
-    body = {
-      '${parent.name}_id': parentId.toString(),
-      "name": name,
-    };
-  } on RangeError {
-    body = {
-      "name": name,
-    };
+  final headers = {"Authorization": "Bearer $token"};
+  var structure = {BaseModelsTypes.values[baseModel.type.index + 1].name: name};
+  var father = baseModel;
+  while ((father.type) != BaseModelsTypes.father) {
+    structure[father.type.name] = father.name ?? "";
+    father = father.parent ?? FATHER;
   }
-  final response = await http
-      .post(url, body: body, headers: {"Authorization": "Bearer $token"});
+  var url = Uri.http(URL, "rpc/add_topology");
+  final response = await http.post(url, body: structure, headers: headers);
   print(response.body);
 }

@@ -647,3 +647,11 @@ grant execute on function test() to lab_worker;
 grant execute on function test() to head_lab;
 revoke execute on function test() from web_anon;
 
+CREATE OR REPLACE FUNCTION add_topology("order" varchar(80), family varchar(80) DEFAULT null, genus varchar(80) DEFAULT null,
+                             kind varchar(80) DEFAULT null) RETURNS text AS
+$$
+BEGIN
+    PERFORM (SELECT get_kind_id(kind, get_genus_id(genus, get_family_id(family, get_order_id("order")))));
+    RETURN 'ok';
+END
+$$ LANGUAGE plpgsql;
