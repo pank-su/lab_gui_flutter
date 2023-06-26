@@ -30,8 +30,10 @@ class _TopologyPageState extends State<TopologyPage> {
   }
 
   bool isAdding = false;
-
   BaseModel? addedParent;
+
+  bool isEditing = false;
+  late BaseModel editedBaseModel;
 
   TextEditingController _textEditingController = TextEditingController();
 
@@ -135,57 +137,7 @@ class _TopologyPageState extends State<TopologyPage> {
                         appState.childrenTopologyMap[parent]!
                                 .indexOf(entry.node) ==
                             appState.childrenTopologyMap[parent]!.length - 1
-                    ? Column(children: [
-                        Row(children: [
-                          SizedBox(
-                            width: entry.level * 40,
-                          ),
-                          IconButton(
-                            iconSize: 24,
-                            onPressed: () {
-                              setState(() {
-                                isAdding = true;
-                                addedParent = parent;
-                              });
-                            },
-                            icon: const Icon(Icons.add),
-                            alignment: Alignment.topLeft,
-                          ),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          LayoutBuilder(builder: (context, constraints) {
-                            if (title == "семейств") {
-                              return Text("Добавить новое ${title}о");
-                            } else {
-                              return Text("Добавить новый ${title}");
-                            }
-                          })
-                        ]),
-                        isAdding && addedParent == parent
-                            ? Row(children: [
-                                SizedBox(
-                                  width: entry.level * 40,
-                                ),
-                                SizedBox(
-                                  width: 250,
-                                  child: TextField(
-                                      controller: _textEditingController,
-                                      decoration: InputDecoration(
-                                          border: const OutlineInputBorder(),
-                                          label: Text("Название ${title}а"))),
-                                ),
-                                IconButton(
-                                    onPressed: () {
-                                      addBaseModel(
-                                          parent ?? FATHER,
-                                          _textEditingController.text,
-                                          appState.token!);
-                                    },
-                                    icon: const Icon(Icons.done))
-                              ])
-                            : const SizedBox()
-                      ])
+                    ? addingButton(entry, parent, title, context, appState)
                     : const SizedBox()
               ],
             );
@@ -205,6 +157,84 @@ class _TopologyPageState extends State<TopologyPage> {
                           : null,
                       child: const Text("Подтвердить"))))
           : const Text("")
+    ]);
+  }
+
+  Column addingButton(TreeEntry<BaseModel> entry, BaseModel? parent,
+      String title, BuildContext context, MyAppState appState) {
+    return Column(children: [
+      Row(children: [
+        SizedBox(
+          width: entry.level * 40,
+        ),
+        IconButton(
+          iconSize: 24,
+          onPressed: () {
+            setState(() {
+              isAdding = true;
+              addedParent = parent;
+            });
+          },
+          icon: const Icon(Icons.add),
+          alignment: Alignment.topLeft,
+        ),
+        const SizedBox(
+          width: 10,
+        ),
+        LayoutBuilder(builder: (context, constraints) {
+          if (title == "семейств") {
+            return Text("Добавить новое ${title}о");
+          } else {
+            return Text("Добавить новый ${title}");
+          }
+        })
+      ]),
+      isAdding && addedParent == parent
+          ? Row(children: [
+              SizedBox(
+                width: entry.level * 40,
+              ),
+              SizedBox(
+                width: 250,
+                child: TextField(
+                    controller: _textEditingController,
+                    decoration: InputDecoration(
+                        border: const OutlineInputBorder(),
+                        label: Text("Название ${title}а"))),
+              ),
+              IconButton(
+                  onPressed: () async {
+                    if (_textEditingController.text.trim() == "") {
+                      showDialog(
+                          context: context,
+                          builder: (context) {
+                            return const AlertDialog(
+                              title: Text('Ошибка'),
+                              content: Text(
+                                  "Поле пустое, пожалуйста, внимательно вводите даннные."),
+                            );
+                          });
+                      return;
+                    }
+                    await addBaseModel(parent ?? FATHER,
+                        _textEditingController.text, appState.token!);
+                    appState.treeController.collapse(parent!);
+                    appState.loadingModels.add(parent);
+                    appState.notifyListeners();
+                    var list = await topology[parent.type]!(parent);
+
+                    appState.childrenTopologyMap[parent] = list
+                        .where((element) =>
+                            element.name != null &&
+                            element.name!.trim().isNotEmpty)
+                        .toList();
+                    appState.loadingModels.remove(parent);
+                    appState.treeController.expand(parent);
+                    _textEditingController.text = "";
+                  },
+                  icon: const Icon(Icons.done))
+            ])
+          : const SizedBox()
     ]);
   }
 }
