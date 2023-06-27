@@ -447,3 +447,17 @@ Future<void> addBaseModel(
   final response = await http.post(url, body: structure, headers: headers);
   print(response.body);
 }
+
+Future<void> updateBaseModel(
+  BaseModel baseModel,
+  String newName,
+  String token,
+) async {
+  final headers = {"Authorization": "Bearer $token"};
+
+  var url = Uri.http(URL, baseModel.type.name, {"id": "eq.${baseModel.id}"});
+
+  final response =
+      await http.patch(url, body: {"name": newName}, headers: headers);
+  print(response.body);
+}
