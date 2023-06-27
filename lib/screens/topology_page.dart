@@ -229,10 +229,7 @@ class _TopologyPageState extends State<TopologyPage> {
   }
 
   Future<void> reloadFather(BaseModel? parent, MyAppState appState) async {
-    if (parent != FATHER)
-      appState.treeController.collapse(parent!);
-    else
-      appState.treeController.rebuild();
+    if (parent != FATHER) appState.treeController.collapse(parent!);
 
     appState.loadingModels.add(parent!);
     appState.notifyListeners();

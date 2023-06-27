@@ -70,7 +70,7 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
     if (!widget.isUpdate) {
       var id = await getLastIdCollection() + 1;
       idController.text = id.toString();
-      numberController.text = "ZIN-TER-M-${id + 4}";
+      numberController.text = "ZIN-TER-M-${id}";
 
       return;
     }
@@ -178,17 +178,23 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
   }
 
   Future<void> addNewItem(MyAppState appState) async {
-    final topology = appState.selectedBaseModel!.getFullTopology();
-    String order = topology[0];
-    String family = "";
-    String genus = "";
-    String kind = "";
-    print(topology);
+    String? pointStr;
+    if (longtitudeController.text.trim() != "" ||
+        latitudeController.text.trim() != "") {
+      pointStr = "Point(${point.latitude} ${point.longitude})";
+    }
+
+    final topology = appState.selectedBaseModel?.getFullTopology();
+    String? order;
+    String? family;
+    String? genus;
+    String? kind;
 
     try {
-      family = topology[1];
-      genus = topology[2];
-      kind = topology[3];
+      order = topology?[0];
+      family = topology?[1];
+      genus = topology?[2];
+      kind = topology?[3];
     } on RangeError {
       // cool block
     }
@@ -202,8 +208,9 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
       ]);
     }
     await addCollection(
-        catalogNumber: numberController.text,
-        collectId: collectIdController.text,
+        collectId: collectIdController.text.trim().isEmpty
+            ? null
+            : collectIdController.text.trim(),
         order: order,
         family: family,
         genus: genus,
@@ -212,13 +219,23 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
         sex: _gender.name,
         vauchInst: vauchController.text,
         vauchId: vauchIDController.text,
-        point: "Point(${point.latitude} ${point.longitude})",
-        country: countryController.text,
-        region: regionController.text,
-        subregion: subRegionController.text,
-        geocomment: geoCommentController.text,
+        point: pointStr,
+        country: countryController.text.trim().isEmpty
+            ? null
+            : countryController.text.trim(),
+        region: regionController.text.trim().isEmpty
+            ? null
+            : regionController.text.trim(),
+        subregion: subRegionController.text.trim().isEmpty
+            ? null
+            : subRegionController.text.trim(),
+        geocomment: geoCommentController.text.trim().isEmpty
+            ? null
+            : geoCommentController.text.trim(),
         dateCollect: dateController.text,
-        comment: commentController.text,
+        comment: commentController.text.trim().isEmpty
+            ? null
+            : commentController.text.trim(),
         collectors: collectors,
         token: appState.token!,
         rna: _isRna);

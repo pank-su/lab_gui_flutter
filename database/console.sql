@@ -268,39 +268,46 @@ DROP FUNCTION get_collector_id;
 
 
 -- Добавление в коллекции
-CREATE OR REPLACE FUNCTION add_collection(catalog_number text, collect_id text, "order" varchar(80),
-                                          family varchar(80), genus varchar(80),
-                                          kind varchar(80), age varchar(20), sex text, vauch_inst text, vauch_id text,
-                                          point geography(point, 4326), country text, region text, subregion text,
-                                          geocomment text, date_collect date, comment text,
-                                          collectors text[][3], rna bool default false)
+CREATE OR REPLACE FUNCTION add_collection(collect_id text default null, "order" varchar(80) default null,
+                                          family varchar(80) default null, genus varchar(80) default null,
+                                          kind varchar(80) default null, age varchar(20) DEFAULT 'Unknown', sex text DEFAULT 'Unknown', vauch_inst text DEFAULT NULL, vauch_id text default null,
+                                          point geography(point, 4326) default null, country text default null, region text default null, subregion text default null,
+                                          geocomment text default null, date_collect date default null, comment text default null,
+                                          collectors text[][3] DEFAULT '{}', rna bool default false)
     RETURNS void
     LANGUAGE plpgsql
 AS
 $$
 DECLARE
     kind_id_       integer;
-    subregion_id_  integer;
+    subregion_id_  integer DEFAULT 4;
     collection_id_ integer;
     collector      text[];
     collector_id_  integer;
 BEGIN
-    kind_id_ := get_kind_id($6, (get_genus_id($5, (get_family_id($4, (get_order_id($3)))))));
-    subregion_id_ := get_subregion_id($14, (get_region_id($13, (get_country_id($12)))));
+    kind_id_ := get_kind_id($5, (get_genus_id($4, (get_family_id($3, (get_order_id($2)))))));
+    IF ($11 IS NOT NULL) THEN
+        subregion_id_ := get_subregion_id($13, (get_region_id($12, (get_country_id($11)))));
+    END IF;
+    collection_id_ := (SELECT id FROM collection ORDER BY id DESC LIMIT 1);
     INSERT INTO collection("CatalogueNumber", collect_id, kind_id, subregion_id, point, vouch_inst_id, vouch_id, sex_id,
                            age_id, day, month, year, comment, geo_comment, rna)
-    VALUES ($1, $2, kind_id_, subregion_id_, $11, get_vouch_inst_id($9), $10, get_sex_id($8), get_age_id($7),
-            extract(day from date_collect), extract(month from date_collect), extract(year from date_collect), $17, $15,
-            $19);
-    collection_id_ := (SELECT id FROM collection ORDER BY id DESC LIMIT 1);
-    FOREACH collector SLICE 1 IN ARRAY $18
+    VALUES (concat('ZIN-TER-M-', collection_id_), $1, kind_id_, subregion_id_, $10, get_vouch_inst_id($8), $9,
+            get_sex_id($7), get_age_id($6),
+            extract(day from date_collect), extract(month from date_collect), extract(year from date_collect), $16, $14,
+            $18);
+    collection_id_ := collection_id_ + 1;
+    IF (array_length($17, 1) IS NULL) THEN RETURN;
+    END IF;
+    FOREACH collector SLICE 1 IN ARRAY $17
         LOOP
             collector_id_ := get_collector_id(collector[1]);
             INSERT INTO collector_to_collection(collector_id, collection_id) VALUES (collector_id_, collection_id_);
         END LOOP;
-END;
+END
 $$;
 ;
+
 
 -- DROP PROCEDURE add_collection;
 

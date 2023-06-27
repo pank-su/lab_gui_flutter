@@ -155,7 +155,7 @@ class _AddTopologyDialogState extends State<AddTopologyDialog> {
                 print(snapshot.error);
                 return ErrorWidget(snapshot);
               } else {
-                return LoadingIndicator();
+                return const LoadingIndicator();
               }
             }),
         TextField(
