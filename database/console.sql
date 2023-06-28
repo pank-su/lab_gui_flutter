@@ -16,7 +16,7 @@ SELECT collection.id         AS ID,
        region.name           as Регион,
        subregion.name        as Субрегион,
        geo_comment           as Геокомментарий,
-       case
+       CASE
            WHEN year = 0 THEN null
            WHEN day IS NULL AND month IS NULL THEN year::text
            WHEN day IS NULL THEN concat_ws('.', month, year)
@@ -24,8 +24,11 @@ SELECT collection.id         AS ID,
            END               AS Дата,
        rna                   as RNA,
        comment               AS "Комментарий",
-       string_agg(c.last_name, ', ') AS "Коллекторы",
-       file_url IS NOT NULL as "Файл"
+       string_agg(concat(c.last_name,
+                            CASE WHEN c.first_name IS NOT NULL THEN concat(' ', "left"(c.first_name, 1), '.') ELSE '' END,
+                            CASE WHEN c.second_name IS NOT NULL THEN concat(' ', "left"(c.second_name, 1), '.') ELSE '' END),
+                  ', ')      AS "Коллекторы",
+       file_url IS NOT NULL  as "Файл"
 FROM collection
          JOIN kind on kind.id = collection.kind_id
          JOIN genus on genus.id = kind.genus_id
@@ -37,8 +40,8 @@ FROM collection
          JOIN subregion on collection.subregion_id = subregion.id
          JOIN region on subregion.region_id = region.id
          JOIN country on region.country_id = country.id
-         JOIN collector_to_collection ctc on collection.id = ctc.collection_id
-         JOIN collector c on ctc.collector_id = c.id
+         LEFT JOIN collector_to_collection ctc on collection.id = ctc.collection_id
+         LEFT JOIN collector c on ctc.collector_id = c.id -- Если нет автора, то запись должна быть
 GROUP BY collection.id, order_.name, family.name, genus.name, kind.name, age.name, sex.name, vi.name, country.name,
          region.name, subregion.name
 ORDER BY collection.id;
@@ -331,59 +334,60 @@ $$;
 
 
 -- Обновление записи
-CREATE OR REPLACE FUNCTION update_collection_by_id(col_id int, catalog_number text, collect_id text,
-                                                   "order" varchar(80),
-                                                   family varchar(80), genus varchar(80),
-                                                   kind varchar(80), age varchar(20), sex text, vauch_inst text,
-                                                   vauch_id text,
-                                                   point geography(point, 4326), country text, region text,
-                                                   subregion text,
-                                                   geocomment text, date_collect date, comment text,
-                                                   collectors text[][3], rna bool default false)
+CREATE OR REPLACE FUNCTION update_collection_by_id(col_id int, collect_id text DEFAULT null,
+                                                   "order" varchar(80) DEFAULT null,
+                                                   family varchar(80) DEFAULT null, genus varchar(80) DEFAULT null,
+                                                   kind varchar(80) DEFAULT null, age varchar(20) DEFAULT 'Unknown',
+                                                   sex text DEFAULT 'Unknown', vauch_inst text DEFAULT null,
+                                                   vauch_id text DEFAULT null,
+                                                   point geography(point, 4326) DEFAULT null, country text DEFAULT null,
+                                                   region text DEFAULT null,
+                                                   subregion text DEFAULT null,
+                                                   geocomment text DEFAULT null, date_collect date DEFAULT null,
+                                                   comment text DEFAULT null,
+                                                   collectors text[][3] DEFAULT '{}', rna bool default false)
     RETURNS void
     LANGUAGE plpgsql AS
 $$
 DECLARE
     kind_id_      integer;
-    subregion_id_ integer;
+    subregion_id_ integer DEFAULT 4;
     collector     text[];
     collector_id_ int;
 BEGIN
-    kind_id_ := get_kind_id($7, (get_genus_id($6, (get_family_id($5, (get_order_id($4)))))));
-    subregion_id_ := get_subregion_id($15, (get_region_id($14, (get_country_id($13)))));
+    kind_id_ := get_kind_id($6, (get_genus_id($5, (get_family_id($4, (get_order_id($3)))))));
+    IF ($12 IS NOT NULL) THEN
+        subregion_id_ := get_subregion_id($14, (get_region_id($13, (get_country_id($12)))));
+    END IF;
     UPDATE collection
     SET kind_id           = kind_id_,
+        "CatalogueNumber" = concat('ZIN-TER-M-', col_id),
         subregion_id      = subregion_id_,
-        "CatalogueNumber" = catalog_number,
-        collect_id        = $3,
+        collect_id        = $2,
         age_id            = get_age_id(age),
         sex_id            = get_sex_id(sex),
         vouch_inst_id     = get_vouch_inst_id(vauch_inst),
-        vouch_id          = $11,
-        point             = $12,
+        vouch_id          = $10,
+        point             = $11,
         geo_comment       = geocomment,
         day               = extract(day from date_collect),
         month             = extract(month from date_collect),
         year              = extract(year from date_collect),
-        comment           = $18,
-        rna               = $20
+        comment           = $17,
+        rna               = $19
     WHERE id = col_id;
-    FOREACH collector SLICE 1 IN ARRAY $19
+    DELETE FROM collector_to_collection WHERE collection_id = col_id;
+    IF (array_length($18, 1) IS NULL) THEN
+        RETURN;
+    END IF;
+    FOREACH collector SLICE 1 IN ARRAY $18
         LOOP
             collector_id_ := get_collector_id(collector[1]);
-            IF EXISTS(SELECT *
-                      FROM collector_to_collection
-                      WHERE collection_id = col_id
-                        AND collector_id = collector_id_) THEN
-
-            ELSE
-                INSERT INTO collector_to_collection(collector_id, collection_id) VALUES (collector_id_, col_id);
-            end if;
+            INSERT INTO collector_to_collection(collector_id, collection_id) VALUES (collector_id_, col_id);
         END LOOP;
 END
 $$;
 ;
-
 
 SELECT update_collection_by_id(6080, catalog_number := 'Вася', collect_id := 'Вася', "order" := 'Вася',
                                family := 'test',

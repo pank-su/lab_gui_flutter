@@ -131,6 +131,7 @@ class MyAppState extends ChangeNotifier {
     state = Loading();
     notifyListeners();
     await Future.delayed(const Duration(seconds: 1));
+    resetSelected();
     try {
       collection = await getCollection();
       collectors = await getCollectors();

@@ -218,52 +218,51 @@ Future<void> addCollection({
 
 Future<void> updateCollection({
   required int col_id,
-  required String catalogNumber,
-  required String collectId,
-  required String order,
-  required String family,
-  required String genus,
-  required String kind,
   required String age,
   required String sex,
   required String vauchInst,
   required String vauchId,
-  required String point,
-  required String country,
-  required String region,
-  required String subregion,
-  required String geocomment,
   required String dateCollect,
-  required String comment,
   required List<List<String>> collectors,
   required String token,
+  String? country,
+  String? region,
+  String? subregion,
+  String? geocomment,
+  String? comment,
+  String? point,
   bool rna = false,
+  String? collectId,
+  String? order,
+  String? family,
+  String? genus,
+  String? kind,
 }) async {
   final url = Uri.http(URL, "rpc/update_collection_by_id");
 
   final body = {
     'col_id': col_id.toString(),
-    'catalog_number': catalogNumber,
-    'collect_id': collectId,
-    'order': order,
-    'family': family,
-    'genus': genus,
-    'kind': kind,
     'age': age,
     'sex': sex,
     'vauch_inst': vauchInst,
     'vauch_id': vauchId,
-    'point': point,
-    'country': country,
-    'region': region,
-    'subregion': subregion,
-    'geocomment': geocomment,
     'date_collect': dateCollect,
-    'comment': comment,
     'collectors':
         '{${collectors.map((collector) => '{"${collector[0]}", "${collector[1]}", "${collector[2]}"}').join(', ')}}',
     'rna': rna.toString(),
   };
+
+  if (country != null) body['country'] = country;
+  if (region != null) body['region'] = region;
+  if (subregion != null) body['subregion'] = subregion;
+  if (geocomment != null) body['geocomment'] = geocomment;
+  if (comment != null) body['comment'] = comment;
+  if (point != null) body['point'] = point;
+  if (collectId != null) body["collect_id"] = collectId;
+  if (order != null) body["order"] = order;
+  if (family != null) body["family"] = family;
+  if (genus != null) body["genus"] = genus;
+  if (kind != null) body["kind"] = kind;
   final response = await http
       .post(url, body: body, headers: {"Authorization": "Bearer $token"});
   print(response.body);
