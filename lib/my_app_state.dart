@@ -87,13 +87,12 @@ class MyAppState extends ChangeNotifier {
   }
 
   /// Проверка токена на сервере
-  // TODO сделать isolate
   Future<void> checkToken() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     token = prefs.getString("token");
     if (token != null && token != "") {
       try {
-        testRequest(token!);
+        checkAuth(token!);
         isAuth = true;
       } on Exception {
         await logout();
@@ -157,6 +156,7 @@ class MyAppState extends ChangeNotifier {
   Future<void> autoUpdate() async {
     while (true) {
       restartNow();
+      checkToken();
       await Future.delayed(const Duration(minutes: 15));
     }
   }

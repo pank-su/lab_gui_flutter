@@ -666,3 +666,19 @@ BEGIN
     RETURN 'ok';
 END
 $$ LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION check_auth() RETURNS text AS
+$$
+DECLARE
+    login_       text := current_setting('request.jwt.claims', true)::json ->> 'login';
+    role_ text := current_setting('request.jwt.claims', true)::json ->> 'role';
+BEGIN
+    IF EXISTS(SELECT * FROM auth.users u WHERE u.role = role_ AND u.login = login_) THEN
+        RETURN 'ok';
+    END IF;
+    RAISE sqlstate 'PT403' using message = 'Вы неавторизованы!',
+      DETAIL = 'Обновите токен',
+          HINT = 'Перезайдите в аккаунт или попробуйте обновить токен';
+END
+$$ LANGUAGE plpgsql SECURITY DEFINER ;

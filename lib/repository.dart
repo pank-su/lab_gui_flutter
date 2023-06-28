@@ -35,6 +35,18 @@ Future<bool> testRequest(String jwt) async {
   }
 }
 
+Future<bool> checkAuth(String jwt) async {
+  var url = Uri.http(URL, "rpc/check_auth");
+  final response =
+      await http.post(url, headers: {"Authorization": "Bearer $jwt"});
+  print(response.body);
+  if (response.statusCode == 200) {
+    return true;
+  } else {
+    throw Exception("Bad login or password");
+  }
+}
+
 Future<List<CollectionItem>> getCollection() async {
   var url = Uri.http(URL, 'basic_view');
   final response = await http.get(url);
