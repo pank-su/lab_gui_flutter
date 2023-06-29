@@ -11,7 +11,7 @@ import 'models/collector.dart';
 import 'models/user.dart';
 import 'models/voucher_institute.dart';
 
-const URL = "localhost:3000";
+const URL = "84.204.46.23:3000";
 
 Future<Jwt> login(String login, String password) async {
   var url = Uri.http(URL, 'rpc/login');
@@ -19,6 +19,7 @@ Future<Jwt> login(String login, String password) async {
   final response =
       await http.post(url, body: {'login': login, 'pass': password});
   if (response.statusCode == 200) {
+    print(response.body);
     return Jwt.fromJson(response.body);
   } else {
     throw Exception("Bad login or password");
