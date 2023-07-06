@@ -12,7 +12,7 @@ import 'package:intl/intl.dart';
 class CollectionDataSource extends DataGridSource {
   BuildContext context;
   final List<CollectionItem> collectionItems;
-  final DateFormat formatter = DateFormat('dd.MM.y');
+  final DateFormat formatter = DateFormat('dd.MM.yyyy');
 
   void updateCollectionItems(List<CollectionItem> collectionItems) {
     context = context;
@@ -99,10 +99,10 @@ class CollectionDataSource extends DataGridSource {
                     break;
                   case DateType.mounthAndYear:
                     formattedString =
-                        DateFormat("MM.y").format(dataGridCell.value);
+                        DateFormat("MM.yyyy").format(dataGridCell.value);
                   case DateType.year:
                     formattedString =
-                        DateFormat("y").format(dataGridCell.value);
+                        DateFormat("yyyy").format(dataGridCell.value);
                 }
                 return Container(
                   alignment: Alignment.centerRight,

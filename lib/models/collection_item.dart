@@ -55,17 +55,19 @@ class CollectionItem {
   factory CollectionItem.fromJson(Map<String, dynamic> json) {
     var dateType = DateType.all;
     DateTime? date;
-    try {
-      date = DateFormat('d.M.y').parse(json['Дата']);
-    } on Error catch (_) {
-    } on FormatException catch (_) {
-      dateType = DateType.mounthAndYear;
+    if (json['Дата'] != null) {
       try {
-        date = DateFormat('M.y').parse(json['Дата']);
+        date = DateFormat('dd.MM.yyyy').parse(json['Дата']);
       } on Error catch (_) {
       } on FormatException catch (_) {
-        dateType = DateType.year;
-        date = DateFormat('y').parse(json['Дата']);
+        dateType = DateType.mounthAndYear;
+        try {
+          date = DateFormat('MM.yyyy').parse(json['Дата']);
+        } on Error catch (_) {
+        } on FormatException catch (_) {
+          dateType = DateType.year;
+          date = DateFormat('yyyy').parse(json['Дата']);
+        }
       }
     }
 

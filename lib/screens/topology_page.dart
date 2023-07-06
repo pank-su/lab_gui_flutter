@@ -1,6 +1,5 @@
 import 'package:context_menus/context_menus.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_fancy_tree_view/flutter_fancy_tree_view.dart';
 import 'package:lab_gui_flutter/my_app_state.dart';
 import 'package:lab_gui_flutter/screens/add_topology_dialog_old.dart';
@@ -37,7 +36,7 @@ class _TopologyPageState extends State<TopologyPage> {
   bool isEditing = false;
   late BaseModel editedBaseModel;
 
-  TextEditingController _textEditingController = TextEditingController();
+  final TextEditingController _textEditingController = TextEditingController();
 
   Widget getLeading(BaseModel baseModel) {
     var appState = context.watch<MyAppState>();
@@ -134,7 +133,7 @@ class _TopologyPageState extends State<TopologyPage> {
                           controller: _textEditingController,
                           decoration: InputDecoration(
                               border: const OutlineInputBorder(),
-                              label: Text("Название ${title}а"))),
+                              label: Text("Название $titleа"))),
                     ),
                     IconButton(
                         onPressed: () async {
@@ -277,9 +276,9 @@ class _TopologyPageState extends State<TopologyPage> {
         ),
         LayoutBuilder(builder: (context, constraints) {
           if (title == "семейств") {
-            return Text("Добавить новое ${title}о");
+            return Text("Добавить новое $titleо");
           } else {
-            return Text("Добавить новый ${title}");
+            return Text("Добавить новый $title");
           }
         })
       ]),
@@ -294,7 +293,7 @@ class _TopologyPageState extends State<TopologyPage> {
                     controller: _textEditingController,
                     decoration: InputDecoration(
                         border: const OutlineInputBorder(),
-                        label: Text("Название ${title}а"))),
+                        label: Text("Название $titleа"))),
               ),
               IconButton(
                   onPressed: () async {

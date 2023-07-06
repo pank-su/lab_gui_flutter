@@ -70,7 +70,7 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
     if (!widget.isUpdate) {
       var id = await getLastIdCollection() + 1;
       idController.text = id.toString();
-      numberController.text = "ZIN-TER-M-${id}";
+      numberController.text = "ZIN-TER-M-$id";
 
       return;
     }

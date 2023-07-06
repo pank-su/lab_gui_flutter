@@ -83,7 +83,7 @@ class _AddTopologyDialogState extends State<AddTopologyDialog> {
               while ((father?.type ?? BaseModelsTypes.father) !=
                   BaseModelsTypes.father) {
                 structure.add(father!);
-                father = father?.parent;
+                father = father.parent;
               }
               var newBaseModel = FATHER;
               for (BaseModel el in structure.reversed) {
@@ -108,7 +108,7 @@ class _AddTopologyDialogState extends State<AddTopologyDialog> {
             },
             items: itemsOfItems[index]!
                 .map((e) => DropdownMenuItem<BaseModel>(
-                    value: e, child: Text(e?.name ?? "")))
+                    value: e, child: Text(e.name ?? "")))
                 .toList()),
       ));
       father = father?.parent;
@@ -123,7 +123,7 @@ class _AddTopologyDialogState extends State<AddTopologyDialog> {
 
     String title = baseModelToTopologyName[type]?.toLowerCase() ?? "";
     return AlertDialog(
-      title: Text("Добавление нового ${title}а"),
+      title: Text("Добавление нового $titleа"),
       icon: const Icon(Icons.add),
       content: Column(mainAxisSize: MainAxisSize.min, children: [
         const Text("Вид:"),
@@ -161,7 +161,7 @@ class _AddTopologyDialogState extends State<AddTopologyDialog> {
         TextField(
           decoration: InputDecoration(
               border: const OutlineInputBorder(),
-              label: Text("Название ${title}а")),
+              label: Text("Название $titleа")),
           controller: nameController,
         ),
       ]),
