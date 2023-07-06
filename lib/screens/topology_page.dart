@@ -159,13 +159,17 @@ class _TopologyPageState extends State<TopologyPage> {
 
                 return ContextMenuRegion(
                     contextMenu: GenericContextMenu(buttonConfigs: [
-                      ContextMenuButtonConfig("Изменить", onPressed: () {
-                        setState(() {
-                          _textEditingController.text = entry.node.name!;
-                          isEditing = true;
-                          editedBaseModel = entry.node;
-                        });
-                      })
+                      ContextMenuButtonConfig("Изменить",
+                          onPressed: appState.isAuth
+                              ? () {
+                                  setState(() {
+                                    _textEditingController.text =
+                                        entry.node.name!;
+                                    isEditing = true;
+                                    editedBaseModel = entry.node;
+                                  });
+                                }
+                              : null)
                     ]),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,

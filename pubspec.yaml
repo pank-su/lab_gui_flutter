@@ -25,6 +25,7 @@ dependencies:
   syncfusion_localizations: ^21.2.4
   shared_preferences: ^2.1.2
   dropdown_button2: ^2.1.2
+  syncfusion_flutter_datagrid_export: ^21.2.4
   flutter_localizations:
     sdk: flutter
 

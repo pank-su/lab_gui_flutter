@@ -17,9 +17,9 @@ class CollectionPage extends StatefulWidget {
 class _CollectionPageState extends State<CollectionPage> {
   late Map<String, double> columnWidthsCollection = {
     'id': double.nan,
-    'catalogueNumber': double.nan,
-    'collectId': double.nan,
-    'order': double.nan,
+    'catalogueNumber': 140,
+    'collectId': 70,
+    'order': 100,
     'family': double.nan,
     'genus': double.nan,
     'species': double.nan,
@@ -33,7 +33,7 @@ class _CollectionPageState extends State<CollectionPage> {
     'region': double.nan,
     'subregion': double.nan,
     'geoComment': double.nan,
-    'date': double.nan,
+    'date': 100,
     'rna': double.nan,
     'comment': double.nan,
     'stringAgg': double.nan,
@@ -54,7 +54,10 @@ class _CollectionPageState extends State<CollectionPage> {
         label: Container(
           padding: const EdgeInsets.all(16.0),
           alignment: Alignment.centerRight,
-          child: const Text('ID'),
+          child: const Text(
+            'ID',
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
       ),
       GridColumn(
@@ -63,7 +66,10 @@ class _CollectionPageState extends State<CollectionPage> {
         label: Container(
           padding: const EdgeInsets.all(16.0),
           alignment: Alignment.centerLeft,
-          child: const Text('Номер в каталоге'),
+          child: const Text(
+            'Номер в каталоге',
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
       ),
       GridColumn(
@@ -72,7 +78,7 @@ class _CollectionPageState extends State<CollectionPage> {
         label: Container(
           padding: const EdgeInsets.all(16.0),
           alignment: Alignment.centerLeft,
-          child: const Text('Collect ID'),
+          child: const Text('Collect ID', overflow: TextOverflow.ellipsis),
         ),
       ),
       GridColumn(
@@ -81,7 +87,7 @@ class _CollectionPageState extends State<CollectionPage> {
         label: Container(
           padding: const EdgeInsets.all(16.0),
           alignment: Alignment.centerLeft,
-          child: const Text('Отряд'),
+          child: const Text('Отряд', overflow: TextOverflow.ellipsis),
         ),
       ),
       GridColumn(
@@ -90,7 +96,7 @@ class _CollectionPageState extends State<CollectionPage> {
         label: Container(
           padding: const EdgeInsets.all(16.0),
           alignment: Alignment.centerLeft,
-          child: const Text('Семейство'),
+          child: const Text('Семейство', overflow: TextOverflow.ellipsis),
         ),
       ),
       GridColumn(
@@ -99,7 +105,7 @@ class _CollectionPageState extends State<CollectionPage> {
         label: Container(
           padding: const EdgeInsets.all(16.0),
           alignment: Alignment.centerLeft,
-          child: const Text('Род'),
+          child: const Text('Род', overflow: TextOverflow.ellipsis),
         ),
       ),
       GridColumn(
@@ -108,7 +114,7 @@ class _CollectionPageState extends State<CollectionPage> {
         label: Container(
           padding: const EdgeInsets.all(16.0),
           alignment: Alignment.centerLeft,
-          child: const Text('Вид'),
+          child: const Text('Вид', overflow: TextOverflow.ellipsis),
         ),
       ),
       GridColumn(
@@ -117,7 +123,7 @@ class _CollectionPageState extends State<CollectionPage> {
         label: Container(
           padding: const EdgeInsets.all(16.0),
           alignment: Alignment.centerLeft,
-          child: const Text('Возраст'),
+          child: const Text('Возраст', overflow: TextOverflow.ellipsis),
         ),
       ),
       GridColumn(
@@ -126,7 +132,7 @@ class _CollectionPageState extends State<CollectionPage> {
         label: Container(
           padding: const EdgeInsets.all(16.0),
           alignment: Alignment.centerLeft,
-          child: const Text('Пол'),
+          child: const Text('Пол', overflow: TextOverflow.ellipsis),
         ),
       ),
       GridColumn(
@@ -135,7 +141,8 @@ class _CollectionPageState extends State<CollectionPage> {
         label: Container(
           padding: const EdgeInsets.all(16.0),
           alignment: Alignment.centerLeft,
-          child: const Text('Ваучерный институт'),
+          child:
+              const Text('Ваучерный институт', overflow: TextOverflow.ellipsis),
         ),
       ),
       GridColumn(
@@ -144,7 +151,7 @@ class _CollectionPageState extends State<CollectionPage> {
         label: Container(
           padding: const EdgeInsets.all(16.0),
           alignment: Alignment.centerLeft,
-          child: const Text('Вауч. ID'),
+          child: const Text('Вауч. ID', overflow: TextOverflow.ellipsis),
         ),
       ),
       GridColumn(
@@ -153,7 +160,7 @@ class _CollectionPageState extends State<CollectionPage> {
         label: Container(
           padding: const EdgeInsets.all(16.0),
           alignment: Alignment.centerRight,
-          child: const Text('Latitude'),
+          child: const Text('Latitude', overflow: TextOverflow.ellipsis),
         ),
       ),
       GridColumn(
@@ -162,7 +169,7 @@ class _CollectionPageState extends State<CollectionPage> {
         label: Container(
           padding: const EdgeInsets.all(16.0),
           alignment: Alignment.centerRight,
-          child: const Text('Longitude'),
+          child: const Text('Longitude', overflow: TextOverflow.ellipsis),
         ),
       ),
       GridColumn(
@@ -171,7 +178,7 @@ class _CollectionPageState extends State<CollectionPage> {
         label: Container(
           padding: const EdgeInsets.all(16.0),
           alignment: Alignment.centerLeft,
-          child: const Text('Страна'),
+          child: const Text('Страна', overflow: TextOverflow.ellipsis),
         ),
       ),
       GridColumn(
@@ -180,7 +187,7 @@ class _CollectionPageState extends State<CollectionPage> {
         label: Container(
           padding: const EdgeInsets.all(16.0),
           alignment: Alignment.centerLeft,
-          child: const Text('Регион'),
+          child: const Text('Регион', overflow: TextOverflow.ellipsis),
         ),
       ),
       GridColumn(
@@ -189,7 +196,7 @@ class _CollectionPageState extends State<CollectionPage> {
         label: Container(
           padding: const EdgeInsets.all(16.0),
           alignment: Alignment.centerLeft,
-          child: const Text('Суб. регион'),
+          child: const Text('Суб. регион', overflow: TextOverflow.ellipsis),
         ),
       ),
       GridColumn(
@@ -198,7 +205,7 @@ class _CollectionPageState extends State<CollectionPage> {
         label: Container(
           padding: const EdgeInsets.all(16.0),
           alignment: Alignment.centerLeft,
-          child: const Text('Гео-комментарий'),
+          child: const Text('Гео-комментарий', overflow: TextOverflow.ellipsis),
         ),
       ),
       GridColumn(
@@ -207,7 +214,7 @@ class _CollectionPageState extends State<CollectionPage> {
         label: Container(
           padding: const EdgeInsets.all(16.0),
           alignment: Alignment.centerLeft,
-          child: const Text('Дата'),
+          child: const Text('Дата', overflow: TextOverflow.ellipsis),
         ),
       ),
       GridColumn(
@@ -216,7 +223,7 @@ class _CollectionPageState extends State<CollectionPage> {
         label: Container(
           padding: const EdgeInsets.all(16.0),
           alignment: Alignment.centerLeft,
-          child: const Text('RNA'),
+          child: const Text('RNA', overflow: TextOverflow.ellipsis),
         ),
       ),
       GridColumn(
@@ -225,7 +232,7 @@ class _CollectionPageState extends State<CollectionPage> {
         label: Container(
           padding: const EdgeInsets.all(16.0),
           alignment: Alignment.centerLeft,
-          child: const Text('Комментарий'),
+          child: const Text('Комментарий', overflow: TextOverflow.ellipsis),
         ),
       ),
       GridColumn(
@@ -234,7 +241,7 @@ class _CollectionPageState extends State<CollectionPage> {
         label: Container(
           padding: const EdgeInsets.all(16.0),
           alignment: Alignment.centerLeft,
-          child: const Text('Авторы'),
+          child: const Text('Коллекторы', overflow: TextOverflow.ellipsis),
         ),
       )
     ];
@@ -267,6 +274,7 @@ class _CollectionPageState extends State<CollectionPage> {
                       headerColor: theme.colorScheme.primaryContainer,
                       selectionColor: theme.colorScheme.secondaryContainer),
                   child: SfDataGrid(
+                    key: appState.collectionKey,
                     controller: appState.collectionController,
                     frozenColumnsCount: 1,
                     columnWidthMode: ColumnWidthMode.auto,

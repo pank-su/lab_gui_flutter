@@ -1,8 +1,10 @@
 import 'package:context_menus/context_menus.dart';
 import 'package:flutter/material.dart';
 import 'package:lab_gui_flutter/screens/add_collector_dialog.dart';
+import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
+import '../my_app_state.dart';
 import 'collector.dart';
 
 class CollectorDataSource extends DataGridSource {
@@ -28,19 +30,24 @@ class CollectorDataSource extends DataGridSource {
 
   @override
   DataGridRowAdapter? buildRow(DataGridRow row) {
+    var appState = Provider.of<MyAppState>(context,
+        listen: false); // Проcлушивание не нужно
     var collectorId = row.getCells().first.value as int;
     return DataGridRowAdapter(
       cells: row.getCells().map<Widget>((dataGridCell) {
         return ContextMenuRegion(
             contextMenu: GenericContextMenu(buttonConfigs: [
-              ContextMenuButtonConfig("Изменить", onPressed: () {
-                showDialog(
-                    context: context,
-                    builder: (context) {
-                      return AddCollector(
-                          isUpdate: true, updatableId: collectorId);
-                    });
-              })
+              ContextMenuButtonConfig("Изменить",
+                  onPressed: appState.isAuth
+                      ? () {
+                          showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AddCollector(
+                                    isUpdate: true, updatableId: collectorId);
+                              });
+                        }
+                      : null),
             ]),
             child: Container(
               alignment: (dataGridCell.columnName == 'id')

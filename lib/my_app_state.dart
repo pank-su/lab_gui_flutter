@@ -11,6 +11,11 @@ import 'models/collector.dart';
 import 'models/jwt.dart';
 import 'repository.dart';
 
+import 'package:syncfusion_flutter_datagrid_export/export.dart';
+import 'dart:convert';
+import 'dart:html';
+import 'package:syncfusion_flutter_xlsio/xlsio.dart';
+
 sealed class TableState {}
 
 class Error extends TableState {}
@@ -27,12 +32,26 @@ class MyAppState extends ChangeNotifier {
   var isAuth = false;
   String? token;
 
+  final GlobalKey<SfDataGridState> collectionKey = GlobalKey<SfDataGridState>();
+
   final DataGridController collectionController = DataGridController();
   final DataGridController collectorController = DataGridController();
   List<CollectionItem> collection = List.empty(growable: true);
   List<Collector> collectors = List.empty(growable: true);
   late CollectionDataSource collectionDataSource;
   late CollectorDataSource collectorDataSource;
+
+  Future<void> exportToExcel() async {
+    final Workbook workbook = Workbook();
+    final Worksheet worksheet = workbook.worksheets[0];
+    collectionKey.currentState!.exportToExcelWorksheet(worksheet);
+    final List<int> bytes = workbook.saveAsStream();
+    AnchorElement(
+        href:
+            "data:application/octet-stream;charset=utf-16le;base64,${base64.encode(bytes)}")
+      ..setAttribute("download", "output.xlsx")
+      ..click();
+  }
 
   // Добавление изменение
   BaseModel? selectedBaseModel;

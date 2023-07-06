@@ -86,7 +86,10 @@ class CollectionDataSource extends DataGridSource {
                                 updatableId: collectionItem.id,
                               );
                             });
-                      })
+                      }),
+            ContextMenuButtonConfig("Экспортировать в Excel", onPressed: () {
+              appState.exportToExcel();
+            })
           ]),
           child: LayoutBuilder(
             builder: (context, constraints) {
