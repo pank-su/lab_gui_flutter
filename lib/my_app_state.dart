@@ -128,6 +128,7 @@ class MyAppState extends ChangeNotifier {
     await prefs.setString("token", token!);
     isAuth = true;
     notifyListeners();
+    restartNow();
   }
 
   /// Выход пользователя
@@ -138,6 +139,7 @@ class MyAppState extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString("token", "");
     notifyListeners();
+    restartNow();
   }
 
   TableState state = Loading();
@@ -148,7 +150,7 @@ class MyAppState extends ChangeNotifier {
   Future<void> restartNow() async {
     state = Loading();
     notifyListeners();
-    await Future.delayed(const Duration(seconds: 1));
+    await Future.delayed(const Duration(milliseconds: 20));
     resetSelected();
     try {
       collection = await getCollection();

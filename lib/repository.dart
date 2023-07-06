@@ -19,7 +19,6 @@ Future<Jwt> login(String login, String password) async {
   final response =
       await http.post(url, body: {'login': login, 'pass': password});
   if (response.statusCode == 200) {
-    print(response.body);
     return Jwt.fromJson(response.body);
   } else {
     throw Exception("Bad login or password");
@@ -40,7 +39,6 @@ Future<bool> checkAuth(String jwt) async {
   var url = Uri.http(URL, "rpc/check_auth");
   final response =
       await http.post(url, headers: {"Authorization": "Bearer $jwt"});
-  print(response.body);
   if (response.statusCode == 200) {
     return true;
   } else {

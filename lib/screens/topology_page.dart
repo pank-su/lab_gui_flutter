@@ -8,6 +8,8 @@ import 'package:provider/provider.dart';
 import '../models/base_model.dart';
 import '../repository.dart';
 
+enum TopologyStatus { nope, editing, adding }
+
 class TopologyPage extends StatefulWidget {
   const TopologyPage({super.key, required this.selectableMode});
 
@@ -30,7 +32,8 @@ class _TopologyPageState extends State<TopologyPage> {
     super.initState();
   }
 
-  bool isAdding = false;
+  TopologyStatus topologyStatus = TopologyStatus.nope;
+
   BaseModel? addedParent;
 
   bool isEditing = false;
@@ -122,7 +125,8 @@ class _TopologyPageState extends State<TopologyPage> {
                   return addingButton(entry, parent, title, context, appState);
                 }
 
-                if (isEditing && editedBaseModel == entry.node) {
+                if (topologyStatus == TopologyStatus.editing &&
+                    editedBaseModel == entry.node) {
                   return Row(children: [
                     SizedBox(
                       width: entry.level * 40,
@@ -165,7 +169,7 @@ class _TopologyPageState extends State<TopologyPage> {
                                   setState(() {
                                     _textEditingController.text =
                                         entry.node.name!;
-                                    isEditing = true;
+                                    topologyStatus = TopologyStatus.editing;
                                     editedBaseModel = entry.node;
                                   });
                                 }
@@ -252,9 +256,10 @@ class _TopologyPageState extends State<TopologyPage> {
 
     _textEditingController.text = "";
     setState(() {
-      isEditing = false;
+      topologyStatus = TopologyStatus.nope;
     });
     appState.notifyListeners();
+    appState.restartNow();
   }
 
   Column addingButton(TreeEntry<BaseModel> entry, BaseModel? parent,
@@ -268,7 +273,8 @@ class _TopologyPageState extends State<TopologyPage> {
           iconSize: 24,
           onPressed: () {
             setState(() {
-              isAdding = true;
+              _textEditingController.clear();
+              topologyStatus = TopologyStatus.adding;
               addedParent = parent;
             });
           },
@@ -286,7 +292,7 @@ class _TopologyPageState extends State<TopologyPage> {
           }
         })
       ]),
-      isAdding && addedParent == parent
+      topologyStatus == TopologyStatus.adding && addedParent == parent
           ? Row(children: [
               SizedBox(
                 width: entry.level * 40,
