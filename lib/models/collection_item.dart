@@ -52,6 +52,11 @@ class CollectionItem {
       this.hasFile,
       required this.dateType});
 
+  @override
+  String toString() {
+    return "$id $catalogueNumber $collectId $order $family $genus $species $age $gender $scientificInstitute $voucherId $latitude $longitude $country $region $subregion $geoComment $date $rna $comment $collectors $hasFile";
+  }
+
   factory CollectionItem.fromJson(Map<String, dynamic> json) {
     var dateType = DateType.all;
     DateTime? date;

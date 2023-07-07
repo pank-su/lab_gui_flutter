@@ -62,6 +62,7 @@ class _MainPageState extends State<MainPage> {
   var selectedIndex = 0;
   static const defaultElavation = 1.0;
   var railVisible = true;
+  var _textEditingController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -112,6 +113,18 @@ class _MainPageState extends State<MainPage> {
                 )),
             centerTitle: true,
             actions: <Widget>[
+              SizedBox(
+                height: 40,
+                width: 280,
+                child: SearchBar(
+                  trailing: [Icon(Icons.search)],
+                  controller: _textEditingController,
+                  onChanged: (value) async {
+                    appState.collectionDataSource.filter = value;
+                    appState.collectionDataSource.notifyListeners();
+                  },
+                ),
+              ),
               IconButton(
                   onPressed: () {
                     showModalSideSheet(context,

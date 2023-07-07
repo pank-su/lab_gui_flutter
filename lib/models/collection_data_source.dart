@@ -11,11 +11,13 @@ import 'package:intl/intl.dart';
 /// Источник данных для таблицы
 class CollectionDataSource extends DataGridSource {
   BuildContext context;
-  final List<CollectionItem> collectionItems;
+  List<CollectionItem> collectionItems;
   final DateFormat formatter = DateFormat('dd.MM.yyyy');
+  String filter = "";
 
   void updateCollectionItems(List<CollectionItem> collectionItems) {
     context = context;
+    this.collectionItems = collectionItems;
     _collectionItems = collectionItems
         .map<DataGridRow>((item) => DataGridRow(cells: [
               DataGridCell<int?>(columnName: 'id', value: item.id),
@@ -60,7 +62,17 @@ class CollectionDataSource extends DataGridSource {
   List<DataGridRow> _collectionItems = [];
 
   @override
-  List<DataGridRow> get rows => _collectionItems;
+  List<DataGridRow> get rows {
+    if (filter.trim().isEmpty) {
+      return _collectionItems;
+    } else {
+      return _collectionItems
+          .where((element) => collectionItems[_collectionItems.indexOf(element)]
+              .toString()
+              .contains(filter))
+          .toList();
+    }
+  }
 
   @override
   DataGridRowAdapter? buildRow(DataGridRow row) {
@@ -87,8 +99,11 @@ class CollectionDataSource extends DataGridSource {
                               );
                             });
                       }),
-            ContextMenuButtonConfig("Экспортировать в Excel", onPressed: () {
+            ContextMenuButtonConfig("Экспортировать", onPressed: () {
               appState.exportToExcel();
+            }),
+            ContextMenuButtonConfig("Экспортировать выделенное", onPressed: () {
+              appState.exportSelectedToExcel();
             })
           ]),
           child: LayoutBuilder(

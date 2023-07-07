@@ -49,7 +49,18 @@ class MyAppState extends ChangeNotifier {
     AnchorElement(
         href:
             "data:application/octet-stream;charset=utf-16le;base64,${base64.encode(bytes)}")
-      ..setAttribute("download", "output.xlsx")
+      ..setAttribute("download", "collection.xlsx")
+      ..click();
+  }
+
+  Future<void> exportSelectedToExcel() async {
+    Workbook workbook = collectionKey.currentState!
+        .exportToExcelWorkbook(rows: collectionController.selectedRows);
+    final List<int> bytes = workbook.saveAsStream();
+    AnchorElement(
+        href:
+            "data:application/octet-stream;charset=utf-16le;base64,${base64.encode(bytes)}")
+      ..setAttribute("download", "collection_selected.xlsx")
       ..click();
   }
 
@@ -62,7 +73,6 @@ class MyAppState extends ChangeNotifier {
         CollectionDataSource(collectionItems: collection, context: context);
     collectorDataSource = CollectorDataSource(collectors, context);
     autoUpdate();
-    checkToken();
     childrenTopologyMap[FATHER] = [];
     treeController = TreeController(
         roots: childrenProvider(FATHER), childrenProvider: childrenProvider);
