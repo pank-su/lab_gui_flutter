@@ -8,15 +8,76 @@ import '../my_app_state.dart';
 import 'collection_item.dart';
 import 'package:intl/intl.dart';
 
+class SearchedText extends StatelessWidget {
+  final String defaultText;
+  final String searchedText;
+
+  const SearchedText({
+    Key? key,
+    required this.defaultText,
+    required this.searchedText,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    var theme = Theme.of(context);
+    if (searchedText.isEmpty) return Text(defaultText);
+    var indices = <Match>[];
+    int lastIndex = 0;
+    while (lastIndex <= defaultText.length - searchedText.length) {
+      int index = defaultText.indexOf(searchedText, lastIndex);
+      if (index == -1) {
+        break;
+      }
+      lastIndex = index + searchedText.length;
+      indices.add(Match(index, lastIndex));
+    }
+    if (indices.isEmpty) return Text(defaultText);
+    List<TextSpan> textSpans = [];
+    if (indices.first.start > 0) {
+      textSpans
+          .add(TextSpan(text: defaultText.substring(0, indices.first.start)));
+    }
+    for (var i = 0; i < indices.length; i++) {
+      textSpans.add(
+        TextSpan(
+          text: defaultText.substring(indices[i].start, indices[i].end),
+          style: TextStyle(
+              backgroundColor: theme.colorScheme.tertiaryContainer,
+              color: theme.colorScheme.onTertiaryContainer),
+        ),
+      );
+      if (i < indices.length - 1) {
+        textSpans.add(
+          TextSpan(
+              text:
+                  defaultText.substring(indices[i].end, indices[i + 1].start)),
+        );
+      }
+    }
+    if (indices.last.end < defaultText.length) {
+      textSpans.add(TextSpan(text: defaultText.substring(indices.last.end)));
+    }
+    return RichText(
+      text: TextSpan(children: textSpans),
+    );
+  }
+}
+
+class Match {
+  final int start;
+  final int end;
+
+  Match(this.start, this.end);
+}
+
 /// Источник данных для таблицы
 class CollectionDataSource extends DataGridSource {
   BuildContext context;
   List<CollectionItem> collectionItems;
   final DateFormat formatter = DateFormat('dd.MM.yyyy');
-  String filter = "";
 
   void updateCollectionItems(List<CollectionItem> collectionItems) {
-    context = context;
     this.collectionItems = collectionItems;
     _collectionItems = collectionItems
         .map<DataGridRow>((item) => DataGridRow(cells: [
@@ -53,6 +114,7 @@ class CollectionDataSource extends DataGridSource {
                   columnName: 'collectors', value: item.collectors),
             ]))
         .toList();
+    buildFilter(filter);
   }
 
   CollectionDataSource({required this.collectionItems, required this.context}) {
@@ -60,25 +122,19 @@ class CollectionDataSource extends DataGridSource {
   }
 
   List<DataGridRow> _collectionItems = [];
+  List<DataGridRow> _filteredCollectionItems = [];
+  String filter = "";
 
   @override
   List<DataGridRow> get rows {
-    if (filter.trim().isEmpty) {
-      return _collectionItems;
-    } else {
-      return _collectionItems
-          .where((element) => collectionItems[_collectionItems.indexOf(element)]
-              .toString()
-              .contains(filter))
-          .toList();
-    }
+    return _filteredCollectionItems;
   }
 
   @override
   DataGridRowAdapter? buildRow(DataGridRow row) {
     var appState = Provider.of<MyAppState>(context,
         listen: false); // Проcлушивание не нужно
-    var collectionItem = appState.collection
+    var collectionItem = collectionItems
         .firstWhere((element) => element.id == row.getCells().first.value);
     return DataGridRowAdapter(
         cells: row.getCells().map<Widget>((dataGridCell) {
@@ -125,7 +181,10 @@ class CollectionDataSource extends DataGridSource {
                 return Container(
                   alignment: Alignment.centerRight,
                   padding: const EdgeInsets.all(16.0),
-                  child: Text(formattedString),
+                  child: SearchedText(
+                    defaultText: formattedString,
+                    searchedText: filter,
+                  ),
                 );
               }
               if (dataGridCell.columnName == 'rna') {
@@ -147,7 +206,10 @@ class CollectionDataSource extends DataGridSource {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             const Icon(Icons.file_present),
-                            Text(dataGridCell.value?.toString() ?? '')
+                            SearchedText(
+                              defaultText: dataGridCell.value?.toString() ?? '',
+                              searchedText: filter,
+                            )
                           ],
                         ),
                       ));
@@ -155,7 +217,10 @@ class CollectionDataSource extends DataGridSource {
                   return Container(
                     alignment: Alignment.centerRight,
                     padding: const EdgeInsets.all(16.0),
-                    child: Text(dataGridCell.value?.toString() ?? ''),
+                    child: SearchedText(
+                      defaultText: dataGridCell.value?.toString() ?? '',
+                      searchedText: filter,
+                    ),
                   );
                 }
               }
@@ -165,10 +230,28 @@ class CollectionDataSource extends DataGridSource {
                     ? Alignment.centerRight
                     : Alignment.centerLeft,
                 padding: const EdgeInsets.all(16.0),
-                child: Text(dataGridCell.value?.toString() ?? ''),
+                child: SearchedText(
+                  defaultText: dataGridCell.value?.toString() ?? '',
+                  searchedText: filter,
+                ),
               );
             },
           ));
     }).toList());
+  }
+
+  void buildFilter(String text) {
+    filter = text;
+    if (text.trim().isNotEmpty) {
+      _filteredCollectionItems = _collectionItems
+          .where((item) => collectionItems[_collectionItems.indexOf(item)]
+              .toString()
+              .contains(text))
+          .toList();
+      notifyListeners();
+    } else {
+      _filteredCollectionItems = _collectionItems;
+      return;
+    }
   }
 }
