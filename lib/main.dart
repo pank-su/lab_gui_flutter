@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:lab_gui_flutter/my_app_state.dart';
 import 'package:lab_gui_flutter/screens/add_collector_dialog.dart';
 import 'package:lab_gui_flutter/screens/add_topology_dialog_old.dart';
@@ -117,6 +116,8 @@ class _MainPageState extends State<MainPage> {
                           setState(() {
                             isSearching = !isSearching;
                             _searchTextEditingController.text = "";
+                            appState.collectionDataSource
+                                .buildFilter(_searchTextEditingController.text);
                           });
                         }
                       : null,
