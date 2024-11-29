@@ -173,6 +173,9 @@ Future<List<VoucherInstitute>> getVoucherInstitute() async {
   }
 }
 
+
+
+
 Future<void> addCollection({
   required String age,
   required String sex,
@@ -201,7 +204,7 @@ Future<void> addCollection({
     'sex': sex,
     'vauch_inst': vauchInst,
     'vauch_id': vauchId,
-    'date_collect': dateCollect,
+    'date_collect': dateCollect.split(".").reversed.join("-"),
     'collectors':
         '{${collectors.map((collector) => '{"${collector[0]}", "${collector[1]}", "${collector[2]}"}').join(', ')}}',
     'rna': rna.toString(),

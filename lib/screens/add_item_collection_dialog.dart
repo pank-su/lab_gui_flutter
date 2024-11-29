@@ -341,7 +341,7 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
                 borderRadius: BorderRadius.circular(50),
                 child: FlutterMap(
                     options: MapOptions(
-                      center: point,
+                      initialCenter: point,
                       maxZoom: 15,
                       onSecondaryTap: (tapPosition, point) {
                         latitudeController.text = point.latitude.toString();
@@ -362,7 +362,7 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
                             ? [
                                 Marker(
                                     point: point,
-                                    builder: (context) => const FlutterLogo())
+                                    child: const FlutterLogo())
                               ]
                             : [],
                       ),
@@ -594,10 +594,8 @@ class _AddCollectionItemDialogState extends State<AddCollectionItemDialog> {
                           lastDate: DateTime.now(),
                           locale: const Locale('ru'),
                           initialEntryMode: DatePickerEntryMode.input);
-                      if (date != null) {
-                        dateController.text = dateFormat.format(date);
-                      }
-                    },
+                      dateController.text = dateFormat.format(date!);
+                                        },
                     icon: const Icon(Icons.today))),
           ),
           const SizedBox(

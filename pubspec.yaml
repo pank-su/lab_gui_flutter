@@ -14,18 +14,18 @@ dependencies:
   http: ^1.1.0
   get_storage: ^2.1.1
   async: ^2.11.0
-  syncfusion_flutter_datagrid: ^22.2.11
-  syncfusion_flutter_core: ^22.2.11
+  syncfusion_flutter_datagrid: ^27.2.4
+  syncfusion_flutter_core: ^27.2.4
   flutter_fancy_tree_view: ^1.1.1
-  flutter_map: ^5.0.0
+  flutter_map: ^7.0.2
   latlong2: ^0.9.0
   osm_nominatim: ^3.0.0
-  context_menus: ^1.0.2
+  context_menus: ^2.0.0+1
   responsive_grid: ^2.3.0
-  syncfusion_localizations: ^22.2.11
+  syncfusion_localizations: ^27.2.4
   shared_preferences: ^2.1.2
   dropdown_button2: ^2.1.2
-  syncfusion_flutter_datagrid_export: ^22.2.11
+  syncfusion_flutter_datagrid_export: ^27.2.4
   flutter_localizations:
     sdk: flutter
 
@@ -33,7 +33,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.0
+  flutter_lints: ^5.0.0
 
 flutter:
   uses-material-design: true
